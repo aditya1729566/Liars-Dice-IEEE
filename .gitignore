@@ -1,0 +1,10 @@
+work/
+outputs/
+web/node_modules/
+web/.next/
+build/
+data/
+experiments/runs/
+__pycache__/
+*.pyc
+.DS_Store
