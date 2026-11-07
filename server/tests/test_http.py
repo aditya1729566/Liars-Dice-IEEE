@@ -41,9 +41,13 @@ class HttpTests(unittest.TestCase):
                 with self.assertRaises(urllib.error.HTTPError) as invalid:
                     send(f"/api/matches/{force['id']}/actions",{'action':illegal,'expected_version':force['version'],'idempotency_key':'invalid-quantity'})
                 self.assertEqual(invalid.exception.code,400)
+                malformed=urllib.request.Request(base+f"/api/matches/{force['id']}/actions",data=b'{',headers={'Content-Type':'application/json'})
+                with self.assertRaises(urllib.error.HTTPError) as broken:
+                    urllib.request.urlopen(malformed,timeout=5)
+                self.assertEqual(broken.exception.code,400)
                 self.assertEqual(send(f"/api/matches/{force['id']}")['version'],force['version'])
                 with app.connection() as con:
-                    self.assertEqual(con.execute('SELECT COUNT(*) FROM invalid_actions WHERE match_id=?',(force['id'],)).fetchone()[0],1)
+                    self.assertEqual(con.execute('SELECT COUNT(*) FROM invalid_actions WHERE match_id=?',(force['id'],)).fetchone()[0],2)
                 forced_action={'type':'call'} if any(a['type']=='call' for a in force['legal_actions']) else {'type':'bid','q':10,'f':1}
                 ended=send(f"/api/matches/{force['id']}/actions",{'action':forced_action,'expected_version':force['version'],'idempotency_key':'force-round-end'})
                 self.assertEqual(ended['phase'],'ROUND_OVER')

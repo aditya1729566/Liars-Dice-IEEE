@@ -89,7 +89,23 @@ class Handler(BaseHTTPRequestHandler):
         length = int(self.headers.get("Content-Length", "0"))
         if length > 16384:
             raise ValueError("request too large")
-        return json.loads(self.rfile.read(length) or b"{}")
+        raw = self.rfile.read(length) or b"{}"
+        self._request_payload = raw.decode("utf-8", errors="replace")
+        return json.loads(raw)
+
+    def audit_invalid(self, reason):
+        bits = [b for b in urlsplit(self.path).path.split("/") if b]
+        if len(bits) == 4 and bits[:2] == ["api", "matches"] and bits[3] in {"actions", "next-round"}:
+            try:
+                payload = getattr(self, "_request_payload", "")
+                try:
+                    key = str(json.loads(payload).get("idempotency_key", ""))
+                except (ValueError, AttributeError):
+                    key = ""
+                with connection() as con:
+                    con.execute("INSERT INTO invalid_actions VALUES (?,?,?,?,?)", (bits[2], key, payload, str(reason), time.time()))
+            except Exception:
+                pass
 
     def dispatch(self, method):
         path = urlsplit(self.path).path
@@ -158,18 +174,13 @@ class Handler(BaseHTTPRequestHandler):
                     cached = con.execute("SELECT response FROM requests WHERE match_id=? AND key=?", (match_id, key)).fetchone()
                     if cached:
                         return json.loads(cached["response"])
-                    try:
-                        if not 8 <= len(key) <= 128:
-                            raise ValueError("idempotency_key must be 8–128 characters")
-                        s = read_match(con, match_id)
-                        if body.get("expected_version") != s["version"]:
-                            raise RuntimeError("stale match version")
-                        command = {"op": "act", "state": s, "action": body.get("action", {})} if bits[3:] == ["actions"] else {"op": "next_round", "state": s}
-                        result = engine(command)
-                    except (ValueError, RuntimeError) as exc:
-                        con.execute("INSERT INTO invalid_actions VALUES (?,?,?,?,?)", (match_id, key, json.dumps(body), str(exc), time.time()))
-                        con.commit()
-                        raise
+                    if not 8 <= len(key) <= 128:
+                        raise ValueError("idempotency_key must be 8–128 characters")
+                    s = read_match(con, match_id)
+                    if body.get("expected_version") != s["version"]:
+                        raise RuntimeError("stale match version")
+                    command = {"op": "act", "state": s, "action": body.get("action", {})} if bits[3:] == ["actions"] else {"op": "next_round", "state": s}
+                    result = engine(command)
                     response = match_response(con, match_id, result["view"])
                     con.execute("UPDATE matches SET state=? WHERE id=?", (json.dumps(result["state"]), match_id))
                     con.execute("INSERT INTO requests VALUES (?,?,?)", (match_id, key, json.dumps(response)))
@@ -193,10 +204,13 @@ class Handler(BaseHTTPRequestHandler):
                 return
             self.send_json(200 if method in {"GET", "DELETE"} else 201, self.dispatch(method))
         except LookupError as exc:
+            self.audit_invalid(exc)
             self.send_json(404, {"error": str(exc)})
         except RuntimeError as exc:
+            self.audit_invalid(exc)
             self.send_json(409, {"error": str(exc)})
         except (ValueError, KeyError, TypeError) as exc:
+            self.audit_invalid(exc)
             self.send_json(400, {"error": str(exc)})
         except Exception as exc:
             self.send_json(500, {"error": str(exc)})
