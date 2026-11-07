@@ -1,0 +1,37 @@
+[
+  {
+    "iterations": 10,
+    "nashconv": 0.34632226770007496,
+    "run_id": "quantity_n1_curve_10"
+  },
+  {
+    "iterations": 50,
+    "nashconv": 0.06926445354001509,
+    "run_id": "quantity_n1_curve_50"
+  },
+  {
+    "iterations": 100,
+    "nashconv": 0.034632226770007324,
+    "run_id": "quantity_n1_curve_100"
+  },
+  {
+    "iterations": 200,
+    "nashconv": 0.017316113385003384,
+    "run_id": "quantity_n1_curve_200"
+  },
+  {
+    "iterations": 500,
+    "nashconv": 0.006926445354001554,
+    "run_id": "quantity_n1_curve_500"
+  },
+  {
+    "iterations": 1000,
+    "nashconv": 0.0034632226770010544,
+    "run_id": "quantity_n1_curve_1000"
+  },
+  {
+    "iterations": 2000,
+    "nashconv": 0.0017316113385006382,
+    "run_id": "quantity_n1_exact_2000_v3"
+  }
+]

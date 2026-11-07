@@ -34,15 +34,27 @@ def main():
     ap.add_argument('--n',type=int,default=5)
     ap.add_argument('--agents',nargs='+',default=['random','probability','aggressive'])
     ap.add_argument('--seed-offset',type=int,default=1000000)
+    ap.add_argument('--paired-seeds',action='store_true',help='reuse each seed and seat across pairings for paired league comparisons')
+    ap.add_argument('--focus',help='evaluate only pairings containing this agent')
     args=ap.parse_args()
     if args.n != 5 or not 1<=args.per_seat<=10000:raise SystemExit('this ruleset requires N=5 and per-seat 1..10000')
+    policy_path=ROOT/'policies'/'fixed5_cfr.json'
+    if {'cfr','adaptive'} & set(args.agents):
+        if not policy_path.exists():raise SystemExit('trained agents require policies/fixed5_cfr.json')
+        policy=json.loads(policy_path.read_text())
+        if policy.get('ruleset')!='fixed5_score5_quantity_only_v1' or not policy.get('policy'):
+            raise SystemExit('trained policy missing or incompatible')
     folder=ROOT/'experiments'/'runs'/args.run_id
     folder.mkdir(parents=True,exist_ok=False)
     plan=list(itertools.combinations(args.agents,2))
-    manifest={'run_id':args.run_id,'status':'started','ruleset':'fixed5_score5_quantity_only_v1','n':args.n,'per_seat':args.per_seat,'pairings':plan,'seed_offset':args.seed_offset,'command':' '.join(os.sys.argv),'started_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'hardware':platform.platform(),'python':platform.python_version(),'engine_sha256':hashlib.sha256(BIN.read_bytes()).hexdigest()}
+    if args.focus:
+        plan=[pair for pair in plan if args.focus in pair]
+        if not plan:raise SystemExit('focus agent has no pairings')
+    policy_hash=hashlib.sha256(policy_path.read_bytes()).hexdigest() if policy_path.exists() else None
+    manifest={'run_id':args.run_id,'status':'started','ruleset':'fixed5_score5_quantity_only_v1','n':args.n,'per_seat':args.per_seat,'pairings':plan,'focus':args.focus,'seed_offset':args.seed_offset,'paired_seeds':args.paired_seeds,'command':' '.join(os.sys.argv),'started_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'hardware':platform.platform(),'python':platform.python_version(),'engine_sha256':hashlib.sha256(BIN.read_bytes()).hexdigest(),'policy_sha256':policy_hash}
     (folder/'manifest.json').write_text(json.dumps(manifest,indent=2))
     db=sqlite3.connect(folder/'evaluation.sqlite3')
-    db.executescript('CREATE TABLE matches(id INTEGER PRIMARY KEY, agent_a TEXT, agent_b TEXT, seed INTEGER, winner TEXT, rounds INTEGER, actions INTEGER, duration_ms REAL);CREATE TABLE decisions(match_id INTEGER, action_index INTEGER, round_index INTEGER, player TEXT, agent TEXT, observation_json TEXT, action_json TEXT, latency_ms REAL);CREATE TABLE rounds(match_id INTEGER, round_index INTEGER, reveal_json TEXT);CREATE TABLE errors(match_id INTEGER,error TEXT);')
+    db.executescript('CREATE TABLE matches(id INTEGER PRIMARY KEY, agent_a TEXT, agent_b TEXT, seed INTEGER, winner TEXT, rounds INTEGER, actions INTEGER, duration_ms REAL);CREATE TABLE decisions(match_id INTEGER, action_index INTEGER, round_index INTEGER, player TEXT, agent TEXT, observation_json TEXT, action_json TEXT, latency_ms REAL, policy_hit INTEGER);CREATE TABLE rounds(match_id INTEGER, round_index INTEGER, reveal_json TEXT);CREATE TABLE errors(match_id INTEGER,error TEXT);')
     results={}
     total_planned=len(plan)*2*args.per_seat
     completed=0
@@ -54,9 +66,10 @@ def main():
                 wins=0
                 for index in range(args.per_seat):
                     if BIN.stat().st_mtime_ns!=binary_mtime:raise RuntimeError('engine binary changed during run')
+                    if policy_hash and hashlib.sha256(policy_path.read_bytes()).hexdigest()!=policy_hash:raise RuntimeError('policy changed during run')
                     if os.statvfs(folder).f_bavail*os.statvfs(folder).f_frsize<2*1024**3:raise RuntimeError('free disk guard reached')
                     if (folder/'evaluation.sqlite3').stat().st_size>int(1.5*1024**3):raise RuntimeError('artifact cap reached')
-                    seed=args.seed_offset+pair_index*args.per_seat+index
+                    seed=args.seed_offset+index if args.paired_seeds else args.seed_offset+pair_index*args.per_seat+index
                     started=time.perf_counter()
                     state=engine({'op':'new','n':5,'agent_human':agent_a,'agent':agent_b,'seed':seed,'auto_ai':False})['state']
                     match_id=completed+1
@@ -69,18 +82,18 @@ def main():
                         player=state['turn'];t=time.perf_counter()
                         result=engine({'op':'bot_step','state':state})
                         latency=(time.perf_counter()-t)*1000
-                        decisions.append((match_id,turn,state['round'],'HUMAN' if player==0 else 'AI',agent_a if player==0 else agent_b,json.dumps(result['observation'],separators=(',',':')),json.dumps(result['action'],separators=(',',':')),latency))
+                        decisions.append((match_id,turn,state['round'],'HUMAN' if player==0 else 'AI',agent_a if player==0 else agent_b,json.dumps(result['observation'],separators=(',',':')),json.dumps(result['action'],separators=(',',':')),latency,int(result.get('policy_hit',False))))
                         state=result['state']
                     if state['status']!='COMPLETED':raise RuntimeError(f'match {match_id} exceeded 500 actions')
                     wins+=state['winner']==('HUMAN' if seat==0 else 'AI')
                     db.execute('INSERT INTO matches VALUES (?,?,?,?,?,?,?,?)',(match_id,agent_a,agent_b,seed,state['winner'],state['round'],len(decisions),(time.perf_counter()-started)*1000))
-                    db.executemany('INSERT INTO decisions VALUES (?,?,?,?,?,?,?,?)',decisions)
+                    db.executemany('INSERT INTO decisions VALUES (?,?,?,?,?,?,?,?,?)',decisions)
                     db.executemany('INSERT INTO rounds VALUES (?,?,?)',[(match_id,e['round'],json.dumps(e,separators=(',',':'))) for e in state['events'] if e['type']=='reveal'])
                     db.commit()
                     completed+=1
                     if completed%100==0:print(json.dumps({'completed':completed,'planned':total_planned}),flush=True)
                 results[f'{left}_vs_{right}_seat_{seat}']={'wins':wins,'matches':args.per_seat,'win_rate':wins/args.per_seat,'wilson95':wilson(wins,args.per_seat)}
-        summary={'status':'completed','run_id':args.run_id,'n':args.n,'completed_matches':completed,'results':results,'decision_count':db.execute('SELECT COUNT(*) FROM decisions').fetchone()[0]}
+        summary={'status':'completed','run_id':args.run_id,'n':args.n,'completed_matches':completed,'results':results,'decision_count':db.execute('SELECT COUNT(*) FROM decisions').fetchone()[0],'policy_hits':dict(db.execute('SELECT agent,SUM(policy_hit) FROM decisions GROUP BY agent').fetchall())}
         (folder/'summary.json').write_text(json.dumps(summary,indent=2))
         manifest.update(status='completed',completed=completed,ended_utc=time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()))
         (folder/'manifest.json').write_text(json.dumps(manifest,indent=2))

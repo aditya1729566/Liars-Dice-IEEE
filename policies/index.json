@@ -1,0 +1,19 @@
+{
+  "policies": [
+    {
+      "id": "fixed5_cfr_100k",
+      "ruleset": "fixed5_score5_quantity_only_v1",
+      "agent_type": "sampled CFR candidate",
+      "training_objective": "one-round point utility, imperfect-recall action abstraction",
+      "training_iterations": 100000,
+      "seed": 1729,
+      "parent_checkpoint": "policies/fixed5_cfr.checkpoint.pkl",
+      "checkpoint_sha256": "9417bb2f37ccc3a54a0afb581a357b91f669fc8a990438a1d43cacc52eb6eb8d",
+      "policy_path": "policies/fixed5_cfr.json",
+      "policy_sha256": "9054a212e2865189ee9358e344e3fba48298408edb96fbf8cc343e75d005b977",
+      "training_run": "fixed5_cfr_100k",
+      "evaluation_run": "fixed5_confirmatory_1000",
+      "champion": true
+    }
+  ]
+}

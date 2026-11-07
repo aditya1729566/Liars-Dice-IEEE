@@ -1,7 +1,16 @@
 {
   "ruleset": "fixed5_score5_quantity_only_v1",
-  "active_champion": null,
-  "reason": "No five-dice quantity-only held-out champion selection has completed.",
+  "active_champion": {
+    "agent": "cfr",
+    "policy_id": "fixed5_cfr_100k",
+    "policy_sha256": "9054a212e2865189ee9358e344e3fba48298408edb96fbf8cc343e75d005b977",
+    "evaluation_run": "fixed5_confirmatory_1000",
+    "paired_league_improvement": 0.0715,
+    "paired_bootstrap_95": [0.05725, 0.0855]
+  },
+  "candidate_policy": "fixed5_cfr_100k",
+  "candidate_policy_sha256": "9054a212e2865189ee9358e344e3fba48298408edb96fbf8cc343e75d005b977",
+  "reason": "CFR passed the preregistered paired-seed confirmation and hard-opponent robustness gates; adaptive remains experimental.",
   "legacy_policy": "legacy/n1_champion.json",
   "legacy_policy_compatible": false
 }

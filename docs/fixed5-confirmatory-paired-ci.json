@@ -1,0 +1,13 @@
+{
+  "run_id": "fixed5_confirmatory_1000",
+  "metric": "CFR minus probability match win rate vs conservative and high_call, equally weighted by opponent and seat",
+  "blocks": 1000,
+  "block_definition": "same seed, average difference across both seats and both opponents",
+  "improvement": 0.0715,
+  "paired_bootstrap_95": [
+    0.05725,
+    0.0855
+  ],
+  "resamples": 20000,
+  "bootstrap_seed": 1729
+}

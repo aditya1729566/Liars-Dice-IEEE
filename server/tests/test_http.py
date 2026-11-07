@@ -20,10 +20,23 @@ class HttpTests(unittest.TestCase):
                 req=urllib.request.Request(base+path,data=body,headers={'Content-Type':'application/json'},method=method)
                 with urllib.request.urlopen(req,timeout=5) as response:return json.load(response)
             try:
+                self.assertTrue(send('/api/health')['policy_ok'])
+                listed=send('/api/agents')['agents']
+                self.assertEqual({x['id'] for x in listed},{'random','probability','aggressive','cfr','adaptive'})
+                self.assertTrue(all(x['available'] for x in listed))
+                self.assertFalse(next(x for x in listed if x['id']=='adaptive')['trained'])
+                self.assertTrue(next(x for x in listed if x['id']=='adaptive')['uses_trained_base'])
                 denied=urllib.request.Request(base+'/api/matches',method='OPTIONS',headers={'Origin':'https://untrusted.example'})
                 with self.assertRaises(urllib.error.HTTPError) as cors:
                     urllib.request.urlopen(denied,timeout=5)
                 self.assertEqual(cors.exception.code,403)
+                with patch.object(app,'trained_policy_ok',return_value=False):
+                    with self.assertRaises(urllib.error.HTTPError) as mismatched:
+                        send('/api/matches',{'n':5,'agent':'cfr'})
+                    self.assertEqual(mismatched.exception.code,400)
+                trained=send('/api/matches',{'n':5,'agent':'cfr'})
+                self.assertEqual(trained['agent'],'cfr')
+                self.assertIsNone(trained['ai_hand'])
                 created=send('/api/matches',{'n':5,'agent':'probability'})
                 self.assertNotIn('rng',created)
                 self.assertNotIn('hands',created)
@@ -65,5 +78,8 @@ class HttpTests(unittest.TestCase):
                 with self.assertRaises(urllib.error.HTTPError) as missing:
                     send(f'/api/matches/{id}')
                 self.assertEqual(missing.exception.code,404)
+                self.assertTrue(send(f"/api/matches/{force['id']}",method='DELETE')['deleted'])
+                with app.connection() as con:
+                    self.assertEqual(con.execute('SELECT COUNT(*) FROM invalid_actions WHERE match_id=?',(force['id'],)).fetchone()[0],0)
             finally:server.shutdown();server.server_close();thread.join()
 if __name__=='__main__':unittest.main()

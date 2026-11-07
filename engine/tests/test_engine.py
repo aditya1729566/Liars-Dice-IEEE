@@ -58,4 +58,47 @@ class EngineTests(unittest.TestCase):
         replied=call({'op':'act','state':opened['state'],'action':human_bid})[1]
         self.assertTrue(any(e.get('player')=='HUMAN' for e in replied['view']['events'] if e['type']=='bid'))
         self.assertTrue(all('hands' not in e for e in replied['view']['events'] if e['type']!='reveal'))
+    def test_trained_agents_choose_legal_actions(self):
+        hits={'cfr':0,'adaptive':0}
+        for agent in hits:
+            for seed in range(30,40):
+                s=call({'op':'new','n':5,'seed':seed,'agent':agent,'agent_human':'probability','auto_ai':False})[1]['state']
+                for _ in range(100):
+                    if s['status']=='COMPLETED':break
+                    if s['phase']=='ROUND_OVER':
+                        s=call({'op':'next_round','state':s,'auto_ai':False})[1]['state'];continue
+                    legal=call({'op':'legal','state':s})[1]['actions']
+                    code,out=call({'op':'bot_step','state':s})
+                    self.assertEqual(code,0,out)
+                    self.assertIn(out['action'],legal)
+                    hits[agent]+=bool(out['policy_hit'])
+                    s=out['state']
+                self.assertEqual(s['status'],'COMPLETED')
+                self.assertTrue(call({'op':'replay','state':s})[1]['valid'])
+        self.assertGreater(hits['cfr'],0)
+        self.assertGreater(hits['adaptive'],0)
+    def test_ai_choice_does_not_use_hidden_human_dice(self):
+        for agent in ('probability','cfr','adaptive'):
+            s=call({'op':'new','n':5,'seed':42,'agent':agent,'auto_ai':False})[1]['state']
+            s['turn']=1
+            variants=[]
+            for hidden in ([1]*5,[6]*5):
+                changed=json.loads(json.dumps(s));changed['hands'][0]=hidden
+                code,out=call({'op':'bot_step','state':changed})
+                self.assertEqual(code,0,out)
+                variants.append(out['action'])
+            self.assertEqual(variants[0],variants[1],agent)
+    def test_adaptive_models_opponent_in_either_seat(self):
+        s=call({'op':'new','n':5,'seed':42,'agent':'probability','agent_human':'adaptive','auto_ai':False})[1]['state']
+        s['starter']=0;s['turn']=0;s['bid']={'q':2,'f':2};s['bidder']=1
+        s['hands'][0]=[2,1,1,3,4];s['policy_rng']=2
+        def action(bidder,truth):
+            changed=json.loads(json.dumps(s))
+            changed['events']=[{'type':'reveal','bidder':bidder,'true':truth} for _ in range(3)]
+            code,out=call({'op':'bot_step','state':changed})
+            self.assertEqual(code,0,out)
+            return out['action']
+        self.assertEqual(action('AI',False),{'type':'call'})
+        self.assertEqual(action('AI',True)['type'],'bid')
+        self.assertEqual(action('HUMAN',False),action('HUMAN',True))
 if __name__=='__main__':unittest.main()

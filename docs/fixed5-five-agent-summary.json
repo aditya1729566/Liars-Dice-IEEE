@@ -1,0 +1,196 @@
+{
+  "status": "completed",
+  "run_id": "fixed5_five_agent_holdout_200",
+  "n": 5,
+  "completed_matches": 4000,
+  "results": {
+    "probability_vs_random_seat_0": {
+      "wins": 200,
+      "matches": 200,
+      "win_rate": 1.0,
+      "wilson95": [
+        0.9811539940816791,
+        1.0
+      ]
+    },
+    "probability_vs_random_seat_1": {
+      "wins": 200,
+      "matches": 200,
+      "win_rate": 1.0,
+      "wilson95": [
+        0.9811539940816791,
+        1.0
+      ]
+    },
+    "probability_vs_aggressive_seat_0": {
+      "wins": 195,
+      "matches": 200,
+      "win_rate": 0.975,
+      "wilson95": [
+        0.9428208558483829,
+        0.9892754385292123
+      ]
+    },
+    "probability_vs_aggressive_seat_1": {
+      "wins": 199,
+      "matches": 200,
+      "win_rate": 0.995,
+      "wilson95": [
+        0.9722256001302286,
+        0.999116854010634
+      ]
+    },
+    "probability_vs_cfr_seat_0": {
+      "wins": 44,
+      "matches": 200,
+      "win_rate": 0.22,
+      "wilson95": [
+        0.16816453539463405,
+        0.2823892279196257
+      ]
+    },
+    "probability_vs_cfr_seat_1": {
+      "wins": 48,
+      "matches": 200,
+      "win_rate": 0.24,
+      "wilson95": [
+        0.1860652685202468,
+        0.3037346545572801
+      ]
+    },
+    "probability_vs_adaptive_seat_0": {
+      "wins": 43,
+      "matches": 200,
+      "win_rate": 0.215,
+      "wilson95": [
+        0.16371792563672208,
+        0.2770242977367209
+      ]
+    },
+    "probability_vs_adaptive_seat_1": {
+      "wins": 55,
+      "matches": 200,
+      "win_rate": 0.275,
+      "wilson95": [
+        0.21779604313809775,
+        0.3406846595251467
+      ]
+    },
+    "random_vs_aggressive_seat_0": {
+      "wins": 118,
+      "matches": 200,
+      "win_rate": 0.59,
+      "wilson95": [
+        0.5207633107255152,
+        0.655844408209187
+      ]
+    },
+    "random_vs_aggressive_seat_1": {
+      "wins": 116,
+      "matches": 200,
+      "win_rate": 0.58,
+      "wilson95": [
+        0.5107194625547862,
+        0.6462651764982825
+      ]
+    },
+    "random_vs_cfr_seat_0": {
+      "wins": 0,
+      "matches": 200,
+      "win_rate": 0.0,
+      "wilson95": [
+        0.0,
+        0.018846005918320894
+      ]
+    },
+    "random_vs_cfr_seat_1": {
+      "wins": 0,
+      "matches": 200,
+      "win_rate": 0.0,
+      "wilson95": [
+        0.0,
+        0.018846005918320894
+      ]
+    },
+    "random_vs_adaptive_seat_0": {
+      "wins": 0,
+      "matches": 200,
+      "win_rate": 0.0,
+      "wilson95": [
+        0.0,
+        0.018846005918320894
+      ]
+    },
+    "random_vs_adaptive_seat_1": {
+      "wins": 0,
+      "matches": 200,
+      "win_rate": 0.0,
+      "wilson95": [
+        0.0,
+        0.018846005918320894
+      ]
+    },
+    "aggressive_vs_cfr_seat_0": {
+      "wins": 0,
+      "matches": 200,
+      "win_rate": 0.0,
+      "wilson95": [
+        0.0,
+        0.018846005918320894
+      ]
+    },
+    "aggressive_vs_cfr_seat_1": {
+      "wins": 4,
+      "matches": 200,
+      "win_rate": 0.02,
+      "wilson95": [
+        0.007804300176394188,
+        0.050287865505193874
+      ]
+    },
+    "aggressive_vs_adaptive_seat_0": {
+      "wins": 1,
+      "matches": 200,
+      "win_rate": 0.005,
+      "wilson95": [
+        0.0008831459893662054,
+        0.02777439986977148
+      ]
+    },
+    "aggressive_vs_adaptive_seat_1": {
+      "wins": 4,
+      "matches": 200,
+      "win_rate": 0.02,
+      "wilson95": [
+        0.007804300176394188,
+        0.050287865505193874
+      ]
+    },
+    "cfr_vs_adaptive_seat_0": {
+      "wins": 98,
+      "matches": 200,
+      "win_rate": 0.49,
+      "wilson95": [
+        0.4215615528275274,
+        0.5588153672908391
+      ]
+    },
+    "cfr_vs_adaptive_seat_1": {
+      "wins": 111,
+      "matches": 200,
+      "win_rate": 0.555,
+      "wilson95": [
+        0.4857317563236392,
+        0.6221951830253456
+      ]
+    }
+  },
+  "decision_count": 74709,
+  "policy_hits": {
+    "adaptive": 13086,
+    "aggressive": 0,
+    "cfr": 13861,
+    "probability": 0,
+    "random": 0
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "best_response_p0": 0.6668095238095236,
+  "best_response_p1": -0.665077912471023,
+  "nashconv": 0.0017316113385006382,
+  "nashconv_definition": "sum of each player's exact information-set-respecting best-response payoff against the opponent average strategy; one-round one-die toy only",
+  "infosets": 294,
+  "elapsed_seconds": 8.272889852523804,
+  "policy_sha256": "6b847f3f50a6635093b8ca52afc293320199d06bac548ca6ee6851783d423eb9"
+}

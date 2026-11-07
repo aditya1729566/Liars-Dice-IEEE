@@ -2,6 +2,11 @@ PYTHON ?= python3.12
 RUN_ID ?= manual_$(shell date -u +%Y%m%dT%H%M%SZ)
 PER_SEAT ?= 1000
 N ?= 5
+ITERATIONS ?= 100000
+SMALL_ITERATIONS ?= 100
+SEED ?= 1729
+SEED_OFFSET ?= 7000000
+EVAL_AGENTS ?= cfr probability conservative high_call
 .PHONY: setup build-engine dev kiosk test verify train-small train-exhibit resume tournament evaluate export-results build
 setup:
 	@$(PYTHON) --version
@@ -14,25 +19,26 @@ build-engine:
 	cmake --build build -j2
 dev: build-engine
 	@$(PYTHON) server/app.py & api_pid=$$!; trap 'kill $$api_pid 2>/dev/null || true' EXIT INT TERM; npm --prefix web run dev
-kiosk: build-engine
+kiosk: build
 	@$(PYTHON) server/app.py & api_pid=$$!; trap 'kill $$api_pid 2>/dev/null || true' EXIT INT TERM; npm --prefix web run start
 test: build-engine
 	$(PYTHON) -m unittest discover -s engine/tests -v
+	$(PYTHON) -m unittest discover -s trainer -p 'test_*.py' -v
 	$(PYTHON) -m unittest discover -s server/tests -v
 verify: test
 	npm --prefix web run lint
 	npm --prefix web run typecheck
 	npm --prefix web run build
 train-small:
-	@echo 'Legacy N=1 CFR trainer is incompatible with fixed-five rules.' >&2; exit 2
-train-exhibit:
-	@echo 'Fixed-five CFR training is not yet implemented; no policy was created.' >&2; exit 2
+	$(PYTHON) trainer/train_small.py --iterations $(SMALL_ITERATIONS) --run-id $(RUN_ID)
+train-exhibit: build-engine
+	$(PYTHON) trainer/train_exhibit.py --n 5 --iterations $(ITERATIONS) --seed $(SEED) --run-id $(RUN_ID)
 resume:
-	@echo 'No current-ruleset CFR checkpoint can be resumed.' >&2; exit 2
+	$(PYTHON) trainer/train_exhibit.py --n 5 --iterations $(ITERATIONS) --seed $(SEED) --run-id $(RUN_ID) --resume
 tournament: build-engine
 	$(PYTHON) scripts/tournament.py --run-id $(RUN_ID) --per-seat $(PER_SEAT) --n $(N)
 evaluate: build-engine
-	$(PYTHON) scripts/tournament.py --run-id $(RUN_ID) --per-seat $(PER_SEAT) --n $(N) --agents probability aggressive conservative high_call always_call
+	$(PYTHON) scripts/tournament.py --run-id $(RUN_ID) --per-seat $(PER_SEAT) --n $(N) --seed-offset $(SEED_OFFSET) --paired-seeds --agents $(EVAL_AGENTS)
 export-results:
 	$(PYTHON) scripts/export_results.py
 build: build-engine

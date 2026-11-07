@@ -17,9 +17,13 @@ for db in (ROOT/'experiments'/'runs').glob('*/evaluation.sqlite3'):
                 cur=con.execute(f'SELECT * FROM {table}')
                 writer=csv.writer(f);writer.writerow([x[0] for x in cur.description]);writer.writerows(cur)
         with (folder/'decisions.jsonl').open('w') as f:
-            cur=con.execute('SELECT match_id,action_index,round_index,player,agent,observation_json,action_json,latency_ms FROM decisions')
-            for match_id,index,round_index,player,agent,obs,action,latency in cur:
-                f.write(json.dumps({'match_id':match_id,'action_index':index,'round':round_index,'player':player,'agent':agent,'observation':json.loads(obs),'action':json.loads(action),'latency_ms':latency},separators=(',',':'))+'\n')
+            columns={row[1] for row in con.execute('PRAGMA table_info(decisions)')}
+            query='SELECT match_id,action_index,round_index,player,agent,observation_json,action_json,latency_ms'+(',policy_hit' if 'policy_hit' in columns else '')+' FROM decisions'
+            for row in con.execute(query):
+                match_id,index,round_index,player,agent,obs,action,latency,*extra=row
+                item={'match_id':match_id,'action_index':index,'round':round_index,'player':player,'agent':agent,'observation':json.loads(obs),'action':json.loads(action),'latency_ms':latency}
+                if extra:item['policy_hit']=bool(extra[0])
+                f.write(json.dumps(item,separators=(',',':'))+'\n')
     summary=json.loads((folder/'summary.json').read_text())
     rows=list(summary['results'].items())
     width,height=900,80+34*len(rows)

@@ -11,7 +11,7 @@ make setup
 make dev
 ```
 
-Open `http://127.0.0.1:3000`. The API listens at `http://127.0.0.1:8787`. For a production build, use `make build` then `make kiosk`.
+Open `http://127.0.0.1:3000`. The API listens at `http://127.0.0.1:8787`. For a production kiosk, use `make kiosk`; it builds both components before starting them.
 
 ## Play
 
@@ -21,9 +21,9 @@ The interface provides keyboard controls, reduced-motion support, public claim h
 
 ## Agents and evidence
 
-The playable opponents are random, probability, and aggressive C++ heuristics. The earlier one-die CFR checkpoint used incompatible rules and is retired. No trained policy or champion is claimed for the current ruleset. The current baseline tournament records every match and decision under `experiments/runs/`; see [the evidence report](docs/FINAL_REPORT.md) for completed results and limitations.
+Five opponents are selectable: random, probability, aggressive, a trained sampled-CFR champion, and a public-outcome adaptive candidate. The trained policy uses an imperfect-recall one-round abstraction for these fixed-five rules. It is the strongest measured option in the local confirmatory league, not a full-game equilibrium. The earlier one-die CFR checkpoint used incompatible rules and is retired. The adaptive candidate remains experimental; see [the evidence report](docs/FINAL_REPORT.md).
 
-Run `make test` for engine/API tests, `make verify` for lint, type checks, and the production build, `make tournament RUN_ID=name PER_SEAT=1000 N=5` for a current-ruleset baseline, and `make export-results` for CSV/JSONL/SVG exports. `make train-exhibit` currently exits with an explicit unsupported status; it does not create a fictitious model.
+Run `make test` for engine, trainer, and API tests; `make verify` for lint, type checks, and the production build; `make tournament RUN_ID=name PER_SEAT=1000 N=5` for the baseline league; `make evaluate RUN_ID=name PER_SEAT=1000` for a paired-seed candidate league; and `make export-results` for CSV/JSONL/SVG exports. `make train-exhibit RUN_ID=name ITERATIONS=100000` trains a new fixed-five candidate with one CPU worker, checkpoints, a 1.5 GiB artifact cap, and a 2 GiB free-disk guard. `make resume RUN_ID=name ITERATIONS=100000` resumes a checkpoint. `make train-small RUN_ID=name SMALL_ITERATIONS=2000` verifies CFR against an exact information-respecting best response in a quantity-only one-die **toy game**. The toy policy is never used in the fixed-five exhibition game. Training does not automatically replace the active policy.
 
 ## Documentation
 

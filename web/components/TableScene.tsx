@@ -41,7 +41,7 @@ function Stage({hand,aiCount,reveal}:{hand:number[];aiCount:number;reveal?:numbe
 export default function TableScene({hand,aiCount,reveal}:{hand:number[];aiCount:number;reveal?:number[]}){
   const [failed,setFailed]=useState(false);
   const [supported]=useState(()=>typeof window==='undefined'||!!document.createElement('canvas').getContext('webgl2'));
-  if(failed||!supported) return <div className="table-fallback" role="img" aria-label="Dice table"><div className="fallback-row">AI {reveal?reveal.map((n,i)=><b key={i}>{n}</b>):Array.from({length:aiCount},(_,i)=><b key={i}>?</b>)}</div><div className="felt-line"/><div className="fallback-row">YOU {hand.map((n,i)=><b key={i}>{n}</b>)}</div></div>;
+  if(failed||!supported) return <div className="table-fallback" role="img" aria-label={`Your dice: ${hand.join(', ')}. AI dice: ${reveal?reveal.join(', '):'concealed'}.`}><div className="fallback-row">AI {reveal?reveal.map((n,i)=><b key={i}>{n}</b>):Array.from({length:aiCount},(_,i)=><b key={i}>?</b>)}</div><div className="felt-line"/><div className="fallback-row">YOU {hand.map((n,i)=><b key={i}>{n}</b>)}</div></div>;
   return <div className="table-canvas" role="img" aria-label={`Your dice: ${hand.join(', ')}. AI has ${aiCount} ${reveal?'revealed':'concealed'} dice.`}>
     <Canvas shadows dpr={[1,1.5]} camera={{position:[0,5.7,7.7],fov:42}} onCreated={({gl})=>{gl.domElement.addEventListener('webglcontextlost',()=>setFailed(true),{once:true});}}>
       <Suspense fallback={null}><Stage hand={hand} aiCount={aiCount} reveal={reveal}/></Suspense>

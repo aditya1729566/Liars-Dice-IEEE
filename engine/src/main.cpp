@@ -69,11 +69,46 @@ static void apply_action(json& s,const json& a){
 static json choose(json& s,int player){
   json acts=legal(s);if(acts.empty())throw runtime_error("no actions");
   string agent=player==1?s.value("agent",string("random")):s.value("agent_human",string("random"));
+  s["last_policy_hit"]=false;
+  if(agent=="switcher")agent=s["round"].get<int>()<=3?"aggressive":"conservative";
   if(agent=="random")return acts[size_t(next64(s,"policy_rng")%acts.size())];
   if(agent=="always_call"&&!s["bid"].is_null())return {{"type","call"}};
   json hand=s["hands"][player];double callP=s["bid"].is_null()?1:truth_prior(s["bid"]["q"],s["bid"]["f"],hand,5);
+  int modal=1,modalCount=0;
+  for(int face=1;face<=6;face++){int count=0;for(const auto& d:hand)if(d.get<int>()==face)count++;if(count>modalCount){modal=face;modalCount=count;}}
+  if(agent=="cfr"||agent=="adaptive"){
+    int q=s["bid"].is_null()?0:s["bid"]["q"].get<int>();
+    int f=s["bid"].is_null()?0:s["bid"]["f"].get<int>();
+    int k=0;for(const auto& d:hand)if(d.get<int>()==f)k++;
+    string key=to_string(s["starter"].get<int>())+"|"+to_string(player)+"|"+to_string(modal)+"|"+to_string(modalCount)+"|"+to_string(q)+"|"+to_string(f)+"|"+to_string(k);
+    std::ifstream file("policies/fixed5_cfr.json");
+    if(file){try{
+      json saved=json::parse(file);if(saved.value("ruleset",string(""))!=RULESET)throw runtime_error("policy ruleset mismatch");
+      const json& table=saved.at("policy");
+      if(table.contains(key)){
+        vector<pair<json,double>> candidates;double total=0;
+        for(const auto& a:acts){string akey=a["type"]=="call"?"C":to_string(a["q"].get<int>())+"-"+to_string(a["f"].get<int>());
+          double w=table[key].value(akey,0.0);if(w>0){candidates.push_back({a,w});total+=w;}}
+        if(total>0){s["last_policy_hit"]=true;
+          bool exploit=false;
+          if(agent=="adaptive"){
+            int seen=0;for(const auto& e:s["events"])if(e.value("type",string(""))=="reveal"&&e.value("bidder",string(""))==name(other(player)))seen++;
+            exploit=seen>=3&&next64(s,"policy_rng")%100<25;
+          }
+          if(!exploit){double draw=double(next64(s,"policy_rng")%1000000)/1000000*total;
+            for(const auto& item:candidates){draw-=item.second;if(draw<=0)return item.first;}return candidates.back().first;}
+          s["last_policy_hit"]=false;
+        }
+      }
+    }catch(const exception&){}
+    }
+  }
+  int seen=0,bluffs=0;
+  if(agent=="adaptive")for(const auto& e:s["events"])if(e.value("type",string(""))=="reveal"&&e.value("bidder",string(""))==name(other(player))){seen++;if(!e.value("true",true))bluffs++;}
+  double adaptiveRate=double(bluffs+1)/double(seen+2);
   double threshold=agent=="aggressive"?0.18:(agent=="conservative"?0.25:(agent=="high_call"?0.60:0.44));
-  if(!s["bid"].is_null()&&callP<threshold)return {{"type","call"}};
+  double adjustedCallP=agent=="adaptive"&&seen>=3?std::clamp(callP-(adaptiveRate-0.5)*0.6,0.0,1.0):callP;
+  if(!s["bid"].is_null()&&adjustedCallP<threshold)return {{"type","call"}};
   double best=-1e9;json selected=acts.back();
   for(const auto& a:acts){if(a["type"]!="bid")continue;int q=a["q"],f=a["f"];
     double p=truth_prior(q,f,hand,5);double score=p-0.022*q;
@@ -112,7 +147,7 @@ static json run(const json& c){
   if(op=="bot_step"){
     if(s["phase"]!="BIDDING")throw runtime_error("round is over");
     int p=s["turn"].get<int>();json observation={{"player",name(p)},{"hand",s["hands"][p]},{"scores",s["scores"]},{"bid",s["bid"]},{"round",s["round"]},{"legal_actions",legal(s)}};
-    json a=choose(s,p);apply_action(s,a);return {{"state",s},{"action",a},{"observation",observation}};
+    json a=choose(s,p);bool policyHit=s.value("last_policy_hit",false);apply_action(s,a);return {{"state",s},{"action",a},{"observation",observation},{"policy_hit",policyHit}};
   }
   if(op=="replay"){
     json rebuilt=new_game({{"seed",s["initial_seed"]},{"agent",s["agent"]},{"agent_human",s.value("agent_human",string("random"))}});

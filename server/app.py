@@ -1,4 +1,5 @@
 """Local HTTP adapter. Rules and AI choices are delegated to the C++ engine."""
+import hashlib
 import json
 import os
 import secrets
@@ -15,8 +16,14 @@ ENGINE = ROOT / "build" / "bluff_engine"
 DB = ROOT / "data" / "matches.sqlite3"
 LOCK = threading.RLock()
 RULESET = "fixed5_score5_quantity_only_v1"
-AGENTS = {"random", "probability", "aggressive"}
+AGENTS = {"random", "probability", "aggressive", "cfr", "adaptive"}
 ALLOWED_ORIGINS = {"http://localhost:3000", "http://127.0.0.1:3000"}
+
+
+def trained_policy_ok():
+    policy_path = ROOT / "policies" / "fixed5_cfr.json"
+    expected = json.loads((ROOT / "policies" / "index.json").read_text())["policies"][0]["policy_sha256"]
+    return policy_path.exists() and hashlib.sha256(policy_path.read_bytes()).hexdigest() == expected
 
 
 def engine(command):
@@ -113,16 +120,21 @@ class Handler(BaseHTTPRequestHandler):
         if bits[:1] != ["api"]:
             raise LookupError("endpoint not found")
         if method == "GET" and bits == ["api", "health"]:
-            return {"ok": ENGINE.exists(), "engine": str(ENGINE.name), "ruleset": RULESET}
+            policy_ok = trained_policy_ok()
+            return {"ok": ENGINE.exists() and policy_ok, "engine": str(ENGINE.name), "ruleset": RULESET, "policy_ok": policy_ok}
         if method == "GET" and bits == ["api", "rules"]:
             return {"version": RULESET, "faces": 6, "wild": False, "dice_per_player": 5, "target_score": 5, "bid_order": "quantity only", "next_starter": "round loser"}
         if method == "GET" and bits == ["api", "agents"]:
-            return {"agents": [{"id": a, "policy_version": "fixed5_heuristic_v1", "trained": False} for a in sorted(AGENTS)]}
+            policy = json.loads((ROOT / "policies" / "fixed5_cfr.json").read_text())
+            policy_ok = trained_policy_ok()
+            return {"agents": [{"id": a, "policy_version": policy["policy_id"] if a in {"cfr", "adaptive"} else "fixed5_heuristic_v1", "available": policy_ok if a in {"cfr", "adaptive"} else True, "trained": a == "cfr", "uses_trained_base": a == "adaptive", "scope": "approximate one-round action abstraction" if a == "cfr" else ("public-outcome model plus approximate CFR base" if a == "adaptive" else "heuristic")} for a in sorted(AGENTS)]}
         if method == "POST" and bits == ["api", "matches"]:
             request = self.body()
             n, agent = request.get("n", 5), request.get("agent", "probability")
             if n != 5 or agent not in AGENTS:
                 raise ValueError("this game requires five dice and a supported agent")
+            if agent in {"cfr", "adaptive"} and not trained_policy_ok():
+                raise ValueError("trained policy checksum failed")
             result = engine({"op": "new", "n": 5, "agent": agent})
             match_id = secrets.token_urlsafe(18)
             with LOCK, connection() as con:
@@ -140,6 +152,8 @@ class Handler(BaseHTTPRequestHandler):
                 if manifest.exists() and json.loads(manifest.read_text()).get("status") == "completed" and json.loads(manifest.read_text()).get("ruleset") == RULESET:
                     item = json.loads(path.read_text())
                     if "results" in item:
+                        if item.get("run_id") in {"fixed5_five_agent_holdout_200", "fixed5_hard_holdout_200"}:
+                            item["warning"] = "Historical adaptive rows are excluded from promotion after a seat-symmetry bug; CFR pairings remain valid."
                         runs.append(item)
             return {"status": "completed" if runs else "no completed evaluation", "runs": runs}
         if len(bits) >= 3 and bits[:2] == ["api", "matches"]:
@@ -148,6 +162,7 @@ class Handler(BaseHTTPRequestHandler):
                 with LOCK, connection() as con:
                     read_match(con, match_id)
                     con.execute("DELETE FROM requests WHERE match_id=?", (match_id,))
+                    con.execute("DELETE FROM invalid_actions WHERE match_id=?", (match_id,))
                     con.execute("DELETE FROM matches WHERE id=?", (match_id,))
                 return {"deleted": True}
             if method == "GET":
