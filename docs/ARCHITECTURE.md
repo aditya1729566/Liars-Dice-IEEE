@@ -1,0 +1,3 @@
+# Architecture
+
+The C++20 engine receives JSON commands and returns JSON results. It alone rolls dice, checks quantity-only raises, resolves challenges, awards points, and manages `BIDDING`, `ROUND_OVER`, and `MATCH_OVER`. A Python standard-library HTTP adapter stores private state in SQLite and passes validated commands to the engine. Invalid attempts are logged separately and leave state unchanged. Browser views hide the AI hand until reveal; matches resume by opaque ID. The Next.js client renders the authoritative view on a 3D table and asks the API to start the next round. Evaluation tooling invokes the same compiled baseline agents with deterministic seeds.

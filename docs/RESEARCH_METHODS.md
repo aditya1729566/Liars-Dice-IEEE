@@ -1,0 +1,3 @@
+# Research methods
+
+All experiments must identify `fixed5_score5_quantity_only_v1`. Previous dice-elimination and lexicographic-bid runs are preserved but excluded from current-rule results. Current evaluations use deterministic seeds, seat swaps, full per-match and per-decision SQLite records, binary checksums, and Wilson confidence intervals. The initial baseline league compares random, probability, and aggressive heuristics only; it cannot establish game-theoretic optimality. No CFR or adaptive policy may be promoted without training on the fixed-five quantity-only game and a separate held-out evaluation.

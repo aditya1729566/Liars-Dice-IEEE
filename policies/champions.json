@@ -1,0 +1,7 @@
+{
+  "ruleset": "fixed5_score5_quantity_only_v1",
+  "active_champion": null,
+  "reason": "No five-dice quantity-only held-out champion selection has completed.",
+  "legacy_policy": "legacy/n1_champion.json",
+  "legacy_policy_compatible": false
+}

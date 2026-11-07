@@ -1,0 +1,63 @@
+{
+  "status": "completed",
+  "run_id": "baseline_gate_n3_1000",
+  "n": 3,
+  "completed_matches": 6000,
+  "results": {
+    "random_vs_probability_seat_0": {
+      "wins": 10,
+      "matches": 1000,
+      "win_rate": 0.01,
+      "wilson95": [
+        0.005440695309270557,
+        0.01830966530539216
+      ]
+    },
+    "random_vs_probability_seat_1": {
+      "wins": 12,
+      "matches": 1000,
+      "win_rate": 0.012,
+      "wilson95": [
+        0.006877579092159561,
+        0.020857473928157594
+      ]
+    },
+    "random_vs_aggressive_seat_0": {
+      "wins": 1,
+      "matches": 1000,
+      "win_rate": 0.001,
+      "wilson95": [
+        0.0001765418290572713,
+        0.0056427029601604705
+      ]
+    },
+    "random_vs_aggressive_seat_1": {
+      "wins": 0,
+      "matches": 1000,
+      "win_rate": 0.0,
+      "wilson95": [
+        0.0,
+        0.003826898586390522
+      ]
+    },
+    "probability_vs_aggressive_seat_0": {
+      "wins": 30,
+      "matches": 1000,
+      "win_rate": 0.03,
+      "wilson95": [
+        0.021093603189697094,
+        0.04250368148151
+      ]
+    },
+    "probability_vs_aggressive_seat_1": {
+      "wins": 20,
+      "matches": 1000,
+      "win_rate": 0.02,
+      "wilson95": [
+        0.012983581129037627,
+        0.03069024151389728
+      ]
+    }
+  },
+  "decision_count": 53794
+}

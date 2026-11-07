@@ -1,0 +1,63 @@
+{
+  "status": "completed",
+  "run_id": "fixed5_baseline_1000",
+  "n": 5,
+  "completed_matches": 6000,
+  "results": {
+    "random_vs_probability_seat_0": {
+      "wins": 0,
+      "matches": 1000,
+      "win_rate": 0.0,
+      "wilson95": [
+        0.0,
+        0.003826898586390522
+      ]
+    },
+    "random_vs_probability_seat_1": {
+      "wins": 0,
+      "matches": 1000,
+      "win_rate": 0.0,
+      "wilson95": [
+        0.0,
+        0.003826898586390522
+      ]
+    },
+    "random_vs_aggressive_seat_0": {
+      "wins": 582,
+      "matches": 1000,
+      "win_rate": 0.582,
+      "wilson95": [
+        0.5511724096520939,
+        0.612199978979738
+      ]
+    },
+    "random_vs_aggressive_seat_1": {
+      "wins": 574,
+      "matches": 1000,
+      "win_rate": 0.574,
+      "wilson95": [
+        0.5431251644557503,
+        0.6043084545534637
+      ]
+    },
+    "probability_vs_aggressive_seat_0": {
+      "wins": 980,
+      "matches": 1000,
+      "win_rate": 0.98,
+      "wilson95": [
+        0.9693097584861028,
+        0.9870164188709625
+      ]
+    },
+    "probability_vs_aggressive_seat_1": {
+      "wins": 977,
+      "matches": 1000,
+      "win_rate": 0.977,
+      "wilson95": [
+        0.9657233030515149,
+        0.9846258356970685
+      ]
+    }
+  },
+  "decision_count": 83309
+}

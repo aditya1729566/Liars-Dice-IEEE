@@ -1,0 +1,3 @@
+# Design system
+
+BLUFF.EXE evokes a high-stakes black-felt dice table. The central live 3D table carries the visual weight; the control rail is quieter and uses plain verbs. Palette: graphite `#101719`, felt `#284139`, cream `#e8e3d7`, amber `#e7a15f`, steel blue `#91aeb7`, challenge red `#b94e42`. Manrope handles display and interface text; DM Mono handles labels and data. The table is rendered with React Three Fiber and hand-built pip dice. Canvas outcomes are visual only; the API owns rolls and results. A DOM-based table remains playable when WebGL is unavailable. Focus states, reduced-motion settings, 44px-plus primary targets, and breakpoint-specific layouts are included.

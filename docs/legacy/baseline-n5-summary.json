@@ -1,0 +1,63 @@
+{
+  "status": "completed",
+  "run_id": "baseline_gate_n5_1000_clean",
+  "n": 5,
+  "completed_matches": 6000,
+  "results": {
+    "random_vs_probability_seat_0": {
+      "wins": 1,
+      "matches": 1000,
+      "win_rate": 0.001,
+      "wilson95": [
+        0.0001765418290572713,
+        0.0056427029601604705
+      ]
+    },
+    "random_vs_probability_seat_1": {
+      "wins": 0,
+      "matches": 1000,
+      "win_rate": 0.0,
+      "wilson95": [
+        0.0,
+        0.003826898586390522
+      ]
+    },
+    "random_vs_aggressive_seat_0": {
+      "wins": 0,
+      "matches": 1000,
+      "win_rate": 0.0,
+      "wilson95": [
+        0.0,
+        0.003826898586390522
+      ]
+    },
+    "random_vs_aggressive_seat_1": {
+      "wins": 1,
+      "matches": 1000,
+      "win_rate": 0.001,
+      "wilson95": [
+        0.0001765418290572713,
+        0.0056427029601604705
+      ]
+    },
+    "probability_vs_aggressive_seat_0": {
+      "wins": 134,
+      "matches": 1000,
+      "win_rate": 0.134,
+      "wilson95": [
+        0.11428073897264132,
+        0.1565205507925966
+      ]
+    },
+    "probability_vs_aggressive_seat_1": {
+      "wins": 127,
+      "matches": 1000,
+      "win_rate": 0.127,
+      "wilson95": [
+        0.10777968175436589,
+        0.14907518459108146
+      ]
+    }
+  },
+  "decision_count": 97448
+}
