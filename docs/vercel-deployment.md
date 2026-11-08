@@ -1,0 +1,9 @@
+# Vercel deployment
+
+The Vercel project `liars-dice-ieee` builds the `web/` directory as a Next.js app. Its `prebuild` script compiles the C++20 game engine for the build platform and copies only the two checked policies, policy index, and recorded research summary into `web/runtime/`. Next.js includes those files in the API function bundle. The browser calls same-origin `/api/*`; the function runs the engine for every game transition.
+
+Production match records live in a **private Vercel Blob store** connected to the project through `BLOB_READ_WRITE_TOKEN`. Each match has a random capability ID. The Blob record contains the authoritative state and idempotency responses; updates use ETag conditional writes and recheck the state version. Completed-match markers provide the public aggregate scoreboard. Research replay is returned only after completion. A match ID grants access to that match; there is no account system. Deleting a visitor match removes both its state and its completed marker.
+
+The same route proxies to the loopback Python API when the Blob token is absent, so `make dev` and `make kiosk` retain their local SQLite behavior. No storage token belongs in Git or in browser code. Vercel project settings must keep the Git root directory at `web`, framework `Next.js`, and the private Blob store connected to production and preview environments. Public access requires Vercel Authentication to be disabled for the project.
+
+For a deployment check, request `/api/health` and confirm both `ok` and `policy_ok` are true. Then play a full match, open its research replay, confirm both dice hands remain hidden before a reveal, and verify a duplicate idempotency key returns the same response. `make verify` covers local engine, trainer, API, lint, typecheck, and production build.

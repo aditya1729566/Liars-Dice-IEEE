@@ -2,6 +2,7 @@ work/
 outputs/
 web/node_modules/
 web/.next/
+web/runtime/
 build/
 data/
 experiments/runs/
