@@ -17,7 +17,7 @@ Open `http://127.0.0.1:3000`. The API listens at `http://127.0.0.1:8787`. For a 
 
 Each round rolls five dice per player. Only your dice are visible until a challenge. A bid such as `3 × 4` claims that at least three of the ten dice show 4. The opener may make any bid; later bids must claim more dice and may choose any face. At quantity 10, the responder must challenge. The challenged round winner scores one point. Select Next Round for fresh dice; the prior round loser opens. Play Again creates a new match.
 
-The interface uses crisp 2D dice without WebGL, keyboard controls, public claim history, and a responsive layout. After each completed human match, the Research tab records the AI's decisions, its five known dice, binomial truth priors, and the chosen action's sampled-policy weight when applicable. It does not present those priors as strategic posteriors or reveal the AI's hand before a challenge.
+The interface uses crisp 2D dice without WebGL, keyboard controls, public claim history, and a responsive layout. After each completed human match, the Research tab offers a slide-by-slide replay of every round start, bid, challenge, reveal, next-round transition, and final result. Each slide shows both hands as post-match evidence, the public claim, score, exact count, the AI's fair-dice truth prior, and recorded policy choices when available. The AI's explanation of a human move is a labeled hypothesis based only on its own dice and public actions; the game cannot know the human's intent. Active matches never expose the private replay or AI hand.
 
 ## Agents and evidence
 
@@ -27,4 +27,4 @@ Run `make test` for engine, trainer, and API tests; `make verify` for lint, type
 
 ## Documentation
 
-[Rules](docs/RULES.md) · [Architecture](docs/ARCHITECTURE.md) · [API](docs/API.md) · [Research methods](docs/RESEARCH_METHODS.md) · [Design system](docs/DESIGN_SYSTEM.md) · [Screenshots](docs/screenshots/bluff-v2-setup.png) · [Raw v2 evaluations](evidence/fixed5-cfr-v2-confirm.zip) · [Current state](docs/EXECUTION_STATE.md) · [Evidence](docs/FINAL_REPORT.md)
+[Rules](docs/RULES.md) · [Architecture](docs/ARCHITECTURE.md) · [API](docs/API.md) · [Research methods](docs/RESEARCH_METHODS.md) · [Design system](docs/DESIGN_SYSTEM.md) · [Game screenshot](docs/screenshots/bluff-v2-setup.png) · [Replay screenshot](docs/screenshots/bluff-replay-human.png) · [Raw v2 evaluations](evidence/fixed5-cfr-v2-confirm.zip) · [Current state](docs/EXECUTION_STATE.md) · [Evidence](docs/FINAL_REPORT.md)

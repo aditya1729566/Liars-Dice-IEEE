@@ -52,6 +52,11 @@ class HttpTests(unittest.TestCase):
                 report=send(f"/api/matches/{trained['id']}/research")
                 self.assertEqual(report['scores'],trained['scores'])
                 self.assertTrue(report['decisions'])
+                self.assertEqual(len(report['replay']),len(trained['events'])+trained['round'])
+                self.assertEqual(sum(frame['kind']=='call' for frame in report['replay']),trained['round'])
+                self.assertEqual(sum(frame['kind']=='reveal' for frame in report['replay']),trained['round'])
+                revealed={event['round']:event['hands'] for event in report['reveals']}
+                self.assertTrue(all(frame['hands']==revealed[frame['round']] for frame in report['replay']))
                 self.assertTrue(all(0<=d['current_bid_truth_prior']<=1 for d in report['decisions'] if d['current_bid_truth_prior'] is not None))
                 self.assertTrue(all(0<=d['action_truth_prior']<=1 for d in report['decisions'] if d['action_truth_prior'] is not None))
                 self.assertEqual(len(report['reveals']),trained['round'])

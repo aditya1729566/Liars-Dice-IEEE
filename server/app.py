@@ -10,6 +10,10 @@ import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit
+try:
+    from .replay import build_replay
+except ImportError:  # Direct `python server/app.py` launch.
+    from replay import build_replay
 
 ROOT = Path(__file__).resolve().parents[1]
 ENGINE = ROOT / "build" / "bluff_engine"
@@ -192,7 +196,8 @@ class Handler(BaseHTTPRequestHandler):
                         "rounds": s["round"],
                         "decisions": s.get("ai_decisions", []),
                         "reveals": [e for e in v["events"] if e["type"] == "reveal"],
-                        "method": "Recorded private AI hand, public bid, chosen action, and pre-action policy weight. Truth probabilities are binomial priors over five unseen dice, not strategic posteriors.",
+                        "replay": build_replay(s),
+                        "method": "Replay slides reconstruct authoritative events and post-match hands. AI move weights and sources come from recorded decisions. The AI's read of human moves is a deterministic hypothesis from its own hand and public actions, not a stored CFR thought or knowledge of human intent. Truth probabilities are binomial priors over five unseen dice, not strategic posteriors.",
                     }
                 if len(bits) == 5 and bits[3] == "analysis":
                     round_index = int(bits[4])
