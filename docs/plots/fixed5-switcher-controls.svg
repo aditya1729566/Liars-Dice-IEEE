@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="940" height="196" viewBox="0 0 940 196">
+<rect width="940" height="196" fill="#101719"/>
+<text x="22" y="34" fill="#e8e3d7" font-family="monospace" font-size="16">fixed5_switcher_controls_400 · 1600 matches</text>
+<text x="22" y="64" fill="#bdc7c2" font-family="monospace" font-size="10">switcher_vs_cfr_seat_0</text>
+<rect x="500" y="54" width="320" height="11" fill="#2b3836"/>
+<rect x="500" y="54" width="36" height="11" fill="#e7a15f"/>
+<text x="830" y="64" fill="#e8e3d7" font-family="monospace" font-size="10">11.2%</text>
+<title>switcher_vs_cfr_seat_0: 45/400; 95% Wilson [8.5%, 14.7%]</title>
+<text x="22" y="94" fill="#bdc7c2" font-family="monospace" font-size="10">switcher_vs_cfr_seat_1</text>
+<rect x="500" y="84" width="320" height="11" fill="#2b3836"/>
+<rect x="500" y="84" width="35" height="11" fill="#e7a15f"/>
+<text x="830" y="94" fill="#e8e3d7" font-family="monospace" font-size="10">11.0%</text>
+<title>switcher_vs_cfr_seat_1: 44/400; 95% Wilson [8.3%, 14.4%]</title>
+<text x="22" y="124" fill="#bdc7c2" font-family="monospace" font-size="10">switcher_vs_probability_seat_0</text>
+<rect x="500" y="114" width="320" height="11" fill="#2b3836"/>
+<rect x="500" y="114" width="87" height="11" fill="#e7a15f"/>
+<text x="830" y="124" fill="#e8e3d7" font-family="monospace" font-size="10">27.3%</text>
+<title>switcher_vs_probability_seat_0: 109/400; 95% Wilson [23.1%, 31.8%]</title>
+<text x="22" y="154" fill="#bdc7c2" font-family="monospace" font-size="10">switcher_vs_probability_seat_1</text>
+<rect x="500" y="144" width="320" height="11" fill="#2b3836"/>
+<rect x="500" y="144" width="90" height="11" fill="#e7a15f"/>
+<text x="830" y="154" fill="#e8e3d7" font-family="monospace" font-size="10">28.0%</text>
+<title>switcher_vs_probability_seat_1: 112/400; 95% Wilson [23.8%, 32.6%]</title>
+</svg>

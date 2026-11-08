@@ -1,0 +1,36 @@
+{
+  "runs": [
+    "fixed5_adaptive_corrected_400",
+    "fixed5_probability_controls_400",
+    "fixed5_switcher_controls_400"
+  ],
+  "block_definition": "same seed, both seats and all opponents in the named comparison",
+  "bootstrap_seed": 1729,
+  "resamples": 10000,
+  "results": {
+    "adaptive_minus_probability_static": {
+      "improvement": 0.049375,
+      "paired_bootstrap_95": [
+        0.0275,
+        0.071875
+      ],
+      "seed_blocks": 400
+    },
+    "adaptive_minus_probability_switcher": {
+      "improvement": 0.145,
+      "paired_bootstrap_95": [
+        0.1125,
+        0.1775
+      ],
+      "seed_blocks": 400
+    },
+    "adaptive_minus_cfr_switcher": {
+      "improvement": -0.02,
+      "paired_bootstrap_95": [
+        -0.04375,
+        0.0025
+      ],
+      "seed_blocks": 400
+    }
+  }
+}

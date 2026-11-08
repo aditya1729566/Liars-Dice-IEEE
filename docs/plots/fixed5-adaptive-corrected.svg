@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="940" height="376" viewBox="0 0 940 376">
+<rect width="940" height="376" fill="#101719"/>
+<text x="22" y="34" fill="#e8e3d7" font-family="monospace" font-size="16">fixed5_adaptive_corrected_400 · 4000 matches</text>
+<text x="22" y="64" fill="#bdc7c2" font-family="monospace" font-size="10">adaptive_vs_cfr_seat_0</text>
+<rect x="500" y="54" width="320" height="11" fill="#2b3836"/>
+<rect x="500" y="54" width="158" height="11" fill="#e7a15f"/>
+<text x="830" y="64" fill="#e8e3d7" font-family="monospace" font-size="10">49.2%</text>
+<title>adaptive_vs_cfr_seat_0: 197/400; 95% Wilson [44.4%, 54.1%]</title>
+<text x="22" y="94" fill="#bdc7c2" font-family="monospace" font-size="10">adaptive_vs_cfr_seat_1</text>
+<rect x="500" y="84" width="320" height="11" fill="#2b3836"/>
+<rect x="500" y="84" width="140" height="11" fill="#e7a15f"/>
+<text x="830" y="94" fill="#e8e3d7" font-family="monospace" font-size="10">43.8%</text>
+<title>adaptive_vs_cfr_seat_1: 175/400; 95% Wilson [39.0%, 48.6%]</title>
+<text x="22" y="124" fill="#bdc7c2" font-family="monospace" font-size="10">adaptive_vs_probability_seat_0</text>
+<rect x="500" y="114" width="320" height="11" fill="#2b3836"/>
+<rect x="500" y="114" width="242" height="11" fill="#e7a15f"/>
+<text x="830" y="124" fill="#e8e3d7" font-family="monospace" font-size="10">75.5%</text>
+<title>adaptive_vs_probability_seat_0: 302/400; 95% Wilson [71.1%, 79.5%]</title>
+<text x="22" y="154" fill="#bdc7c2" font-family="monospace" font-size="10">adaptive_vs_probability_seat_1</text>
+<rect x="500" y="144" width="320" height="11" fill="#2b3836"/>
+<rect x="500" y="144" width="229" height="11" fill="#e7a15f"/>
+<text x="830" y="154" fill="#e8e3d7" font-family="monospace" font-size="10">71.5%</text>
+<title>adaptive_vs_probability_seat_1: 286/400; 95% Wilson [66.9%, 75.7%]</title>
+<text x="22" y="184" fill="#bdc7c2" font-family="monospace" font-size="10">adaptive_vs_conservative_seat_0</text>
+<rect x="500" y="174" width="320" height="11" fill="#2b3836"/>
+<rect x="500" y="174" width="242" height="11" fill="#e7a15f"/>
+<text x="830" y="184" fill="#e8e3d7" font-family="monospace" font-size="10">75.5%</text>
+<title>adaptive_vs_conservative_seat_0: 302/400; 95% Wilson [71.1%, 79.5%]</title>
+<text x="22" y="214" fill="#bdc7c2" font-family="monospace" font-size="10">adaptive_vs_conservative_seat_1</text>
+<rect x="500" y="204" width="320" height="11" fill="#2b3836"/>
+<rect x="500" y="204" width="229" height="11" fill="#e7a15f"/>
+<text x="830" y="214" fill="#e8e3d7" font-family="monospace" font-size="10">71.5%</text>
+<title>adaptive_vs_conservative_seat_1: 286/400; 95% Wilson [66.9%, 75.7%]</title>
+<text x="22" y="244" fill="#bdc7c2" font-family="monospace" font-size="10">adaptive_vs_high_call_seat_0</text>
+<rect x="500" y="234" width="320" height="11" fill="#2b3836"/>
+<rect x="500" y="234" width="263" height="11" fill="#e7a15f"/>
+<text x="830" y="244" fill="#e8e3d7" font-family="monospace" font-size="10">82.2%</text>
+<title>adaptive_vs_high_call_seat_0: 329/400; 95% Wilson [78.2%, 85.7%]</title>
+<text x="22" y="274" fill="#bdc7c2" font-family="monospace" font-size="10">adaptive_vs_high_call_seat_1</text>
+<rect x="500" y="264" width="320" height="11" fill="#2b3836"/>
+<rect x="500" y="264" width="262" height="11" fill="#e7a15f"/>
+<text x="830" y="274" fill="#e8e3d7" font-family="monospace" font-size="10">82.0%</text>
+<title>adaptive_vs_high_call_seat_1: 328/400; 95% Wilson [77.9%, 85.5%]</title>
+<text x="22" y="304" fill="#bdc7c2" font-family="monospace" font-size="10">adaptive_vs_switcher_seat_0</text>
+<rect x="500" y="294" width="320" height="11" fill="#2b3836"/>
+<rect x="500" y="294" width="275" height="11" fill="#e7a15f"/>
+<text x="830" y="304" fill="#e8e3d7" font-family="monospace" font-size="10">86.0%</text>
+<title>adaptive_vs_switcher_seat_0: 344/400; 95% Wilson [82.3%, 89.1%]</title>
+<text x="22" y="334" fill="#bdc7c2" font-family="monospace" font-size="10">adaptive_vs_switcher_seat_1</text>
+<rect x="500" y="324" width="320" height="11" fill="#2b3836"/>
+<rect x="500" y="324" width="281" height="11" fill="#e7a15f"/>
+<text x="830" y="334" fill="#e8e3d7" font-family="monospace" font-size="10">87.8%</text>
+<title>adaptive_vs_switcher_seat_1: 351/400; 95% Wilson [84.2%, 90.6%]</title>
+</svg>

@@ -1,0 +1,107 @@
+{
+  "status": "completed",
+  "run_id": "fixed5_adaptive_corrected_400",
+  "n": 5,
+  "completed_matches": 4000,
+  "results": {
+    "adaptive_vs_cfr_seat_0": {
+      "wins": 197,
+      "matches": 400,
+      "win_rate": 0.4925,
+      "wilson95": [
+        0.4438103957369542,
+        0.5413322938720411
+      ]
+    },
+    "adaptive_vs_cfr_seat_1": {
+      "wins": 175,
+      "matches": 400,
+      "win_rate": 0.4375,
+      "wilson95": [
+        0.3897069912730114,
+        0.4864820888019487
+      ]
+    },
+    "adaptive_vs_probability_seat_0": {
+      "wins": 302,
+      "matches": 400,
+      "win_rate": 0.755,
+      "wilson95": [
+        0.7105566038330045,
+        0.7945919494611584
+      ]
+    },
+    "adaptive_vs_probability_seat_1": {
+      "wins": 286,
+      "matches": 400,
+      "win_rate": 0.715,
+      "wilson95": [
+        0.6688796049741064,
+        0.757029959568031
+      ]
+    },
+    "adaptive_vs_conservative_seat_0": {
+      "wins": 302,
+      "matches": 400,
+      "win_rate": 0.755,
+      "wilson95": [
+        0.7105566038330045,
+        0.7945919494611584
+      ]
+    },
+    "adaptive_vs_conservative_seat_1": {
+      "wins": 286,
+      "matches": 400,
+      "win_rate": 0.715,
+      "wilson95": [
+        0.6688796049741064,
+        0.757029959568031
+      ]
+    },
+    "adaptive_vs_high_call_seat_0": {
+      "wins": 329,
+      "matches": 400,
+      "win_rate": 0.8225,
+      "wilson95": [
+        0.7820396924303856,
+        0.8568246543828204
+      ]
+    },
+    "adaptive_vs_high_call_seat_1": {
+      "wins": 328,
+      "matches": 400,
+      "win_rate": 0.82,
+      "wilson95": [
+        0.7793616474280234,
+        0.8545502625881809
+      ]
+    },
+    "adaptive_vs_switcher_seat_0": {
+      "wins": 344,
+      "matches": 400,
+      "win_rate": 0.86,
+      "wilson95": [
+        0.8225600194276628,
+        0.8905908793405672
+      ]
+    },
+    "adaptive_vs_switcher_seat_1": {
+      "wins": 351,
+      "matches": 400,
+      "win_rate": 0.8775,
+      "wilson95": [
+        0.8417306493136648,
+        0.9060873070335763
+      ]
+    }
+  },
+  "decision_count": 109549,
+  "policy_hits": {
+    "adaptive": 46936,
+    "cfr": 13194,
+    "conservative": 0,
+    "high_call": 0,
+    "probability": 0,
+    "switcher": 0
+  }
+}

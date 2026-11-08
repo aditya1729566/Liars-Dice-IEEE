@@ -149,9 +149,11 @@ class Handler(BaseHTTPRequestHandler):
             runs = []
             for path in sorted((ROOT / "experiments" / "runs").glob("*/summary.json")):
                 manifest = path.parent / "manifest.json"
-                if manifest.exists() and json.loads(manifest.read_text()).get("status") == "completed" and json.loads(manifest.read_text()).get("ruleset") == RULESET:
+                manifest_data = json.loads(manifest.read_text()) if manifest.exists() else {}
+                if manifest_data.get("status") == "completed" and manifest_data.get("ruleset") == RULESET:
                     item = json.loads(path.read_text())
                     if "results" in item:
+                        item["provenance"] = {"seed_offset": manifest_data.get("seed_offset"), "engine_sha256": manifest_data.get("engine_sha256"), "policy_sha256": manifest_data.get("policy_sha256")}
                         if item.get("run_id") in {"fixed5_five_agent_holdout_200", "fixed5_hard_holdout_200"}:
                             item["warning"] = "Historical adaptive rows are excluded from promotion after a seat-symmetry bug; CFR pairings remain valid."
                         runs.append(item)

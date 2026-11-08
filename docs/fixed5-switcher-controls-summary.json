@@ -1,0 +1,50 @@
+{
+  "status": "completed",
+  "run_id": "fixed5_switcher_controls_400",
+  "n": 5,
+  "completed_matches": 1600,
+  "results": {
+    "switcher_vs_cfr_seat_0": {
+      "wins": 45,
+      "matches": 400,
+      "win_rate": 0.1125,
+      "wilson95": [
+        0.0851480200886654,
+        0.14722427637608715
+      ]
+    },
+    "switcher_vs_cfr_seat_1": {
+      "wins": 44,
+      "matches": 400,
+      "win_rate": 0.11,
+      "wilson95": [
+        0.08296824650193971,
+        0.14445161316581123
+      ]
+    },
+    "switcher_vs_probability_seat_0": {
+      "wins": 109,
+      "matches": 400,
+      "win_rate": 0.2725,
+      "wilson95": [
+        0.23118418800549204,
+        0.3181440634673627
+      ]
+    },
+    "switcher_vs_probability_seat_1": {
+      "wins": 112,
+      "matches": 400,
+      "win_rate": 0.28,
+      "wilson95": [
+        0.23825069981202085,
+        0.32593486205183864
+      ]
+    }
+  },
+  "decision_count": 34061,
+  "policy_hits": {
+    "cfr": 6354,
+    "probability": 0,
+    "switcher": 0
+  }
+}

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="940" height="196" viewBox="0 0 940 196">
+<rect width="940" height="196" fill="#101719"/>
+<text x="22" y="34" fill="#e8e3d7" font-family="monospace" font-size="16">fixed5_probability_controls_400 · 1600 matches</text>
+<text x="22" y="64" fill="#bdc7c2" font-family="monospace" font-size="10">probability_vs_conservative_seat_0</text>
+<rect x="500" y="54" width="320" height="11" fill="#2b3836"/>
+<rect x="500" y="54" width="159" height="11" fill="#e7a15f"/>
+<text x="830" y="64" fill="#e8e3d7" font-family="monospace" font-size="10">49.8%</text>
+<title>probability_vs_conservative_seat_0: 199/400; 95% Wilson [44.9%, 54.6%]</title>
+<text x="22" y="94" fill="#bdc7c2" font-family="monospace" font-size="10">probability_vs_conservative_seat_1</text>
+<rect x="500" y="84" width="320" height="11" fill="#2b3836"/>
+<rect x="500" y="84" width="161" height="11" fill="#e7a15f"/>
+<text x="830" y="94" fill="#e8e3d7" font-family="monospace" font-size="10">50.2%</text>
+<title>probability_vs_conservative_seat_1: 201/400; 95% Wilson [45.4%, 55.1%]</title>
+<text x="22" y="124" fill="#bdc7c2" font-family="monospace" font-size="10">probability_vs_high_call_seat_0</text>
+<rect x="500" y="114" width="320" height="11" fill="#2b3836"/>
+<rect x="500" y="114" width="309" height="11" fill="#e7a15f"/>
+<text x="830" y="124" fill="#e8e3d7" font-family="monospace" font-size="10">96.5%</text>
+<title>probability_vs_high_call_seat_0: 386/400; 95% Wilson [94.2%, 97.9%]</title>
+<text x="22" y="154" fill="#bdc7c2" font-family="monospace" font-size="10">probability_vs_high_call_seat_1</text>
+<rect x="500" y="144" width="320" height="11" fill="#2b3836"/>
+<rect x="500" y="144" width="304" height="11" fill="#e7a15f"/>
+<text x="830" y="154" fill="#e8e3d7" font-family="monospace" font-size="10">95.0%</text>
+<title>probability_vs_high_call_seat_1: 380/400; 95% Wilson [92.4%, 96.7%]</title>
+</svg>

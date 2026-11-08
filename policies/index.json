@@ -6,6 +6,7 @@
       "agent_type": "sampled CFR candidate",
       "training_objective": "one-round point utility, imperfect-recall action abstraction",
       "training_iterations": 100000,
+      "created_utc": "2026-11-07T17:43:13Z",
       "seed": 1729,
       "parent_checkpoint": "policies/fixed5_cfr.checkpoint.pkl",
       "checkpoint_sha256": "9417bb2f37ccc3a54a0afb581a357b91f669fc8a990438a1d43cacc52eb6eb8d",

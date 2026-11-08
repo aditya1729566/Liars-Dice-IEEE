@@ -1,0 +1,10 @@
+{
+  "run_id": "fixed5_adaptive_corrected_400",
+  "adaptive_matches": 4000,
+  "adaptive_decisions": 51960,
+  "policy_hits": 46936,
+  "decisions_with_at_least_three_confirmed_opponent_bidder_reveals": 11489,
+  "matches_reaching_three_observations": 1845,
+  "first_eligible_round_mean": 5.207588075880759,
+  "note": "Eligibility is reconstructed from public revealed rounds; this does not prove the adaptive branch was sampled on every eligible decision."
+}
