@@ -6,8 +6,8 @@ ITERATIONS ?= 100000
 SMALL_ITERATIONS ?= 100
 SEED ?= 1729
 SEED_OFFSET ?= 7000000
-EVAL_AGENTS ?= cfr probability conservative high_call
-.PHONY: setup build-engine dev kiosk test verify train-small train-exhibit resume tournament evaluate export-results build
+EVAL_AGENTS ?= cfr2 probability conservative high_call
+.PHONY: setup build-engine dev kiosk test verify train-small train-exhibit train-exhibit-v2 resume resume-v2 tournament evaluate export-results research-index build
 setup:
 	@$(PYTHON) --version
 	@cmake --version | head -1
@@ -33,13 +33,19 @@ train-small:
 	$(PYTHON) trainer/train_small.py --iterations $(SMALL_ITERATIONS) --run-id $(RUN_ID)
 train-exhibit: build-engine
 	$(PYTHON) trainer/train_exhibit.py --n 5 --iterations $(ITERATIONS) --seed $(SEED) --run-id $(RUN_ID)
+train-exhibit-v2: build-engine
+	$(PYTHON) trainer/train_exhibit_v2.py --n 5 --iterations $(ITERATIONS) --seed $(SEED) --run-id $(RUN_ID)
 resume:
 	$(PYTHON) trainer/train_exhibit.py --n 5 --iterations $(ITERATIONS) --seed $(SEED) --run-id $(RUN_ID) --resume
+resume-v2:
+	$(PYTHON) trainer/train_exhibit_v2.py --n 5 --iterations $(ITERATIONS) --seed $(SEED) --run-id $(RUN_ID) --resume
 tournament: build-engine
 	$(PYTHON) scripts/tournament.py --run-id $(RUN_ID) --per-seat $(PER_SEAT) --n $(N)
 evaluate: build-engine
 	$(PYTHON) scripts/tournament.py --run-id $(RUN_ID) --per-seat $(PER_SEAT) --n $(N) --seed-offset $(SEED_OFFSET) --paired-seeds --agents $(EVAL_AGENTS)
 export-results:
 	$(PYTHON) scripts/export_results.py
+research-index:
+	$(PYTHON) scripts/build_research_index.py
 build: build-engine
 	npm --prefix web run build

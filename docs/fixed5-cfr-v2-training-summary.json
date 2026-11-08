@@ -1,0 +1,14 @@
+{
+  "run_id": "fixed5_cfr_v2_100k",
+  "ruleset": "fixed5_score5_quantity_only_v1",
+  "iterations": 100000,
+  "infosets": 24599,
+  "elapsed_seconds": 44.21,
+  "policy_sha256": "d99c9c002989c65fed62348b8ea623974436b7ebc75f9a0821c6e5edee99d9a8",
+  "limitations": [
+    "not full match-aware",
+    "quantity jumps greater than two abstracted away",
+    "imperfect recall; no equilibrium guarantee",
+    "no exploitability estimate"
+  ]
+}

@@ -16,14 +16,18 @@ ENGINE = ROOT / "build" / "bluff_engine"
 DB = ROOT / "data" / "matches.sqlite3"
 LOCK = threading.RLock()
 RULESET = "fixed5_score5_quantity_only_v1"
-AGENTS = {"random", "probability", "aggressive", "cfr", "adaptive"}
+AGENTS = {"random", "probability", "aggressive", "cfr2", "adaptive"}
 ALLOWED_ORIGINS = {"http://localhost:3000", "http://127.0.0.1:3000"}
 
 
-def trained_policy_ok():
-    policy_path = ROOT / "policies" / "fixed5_cfr.json"
-    expected = json.loads((ROOT / "policies" / "index.json").read_text())["policies"][0]["policy_sha256"]
-    return policy_path.exists() and hashlib.sha256(policy_path.read_bytes()).hexdigest() == expected
+def trained_policy_ok(agent="cfr2"):
+    policy_id = "fixed5_cfr_v2_100k" if agent == "cfr2" else "fixed5_cfr_100k"
+    entries = json.loads((ROOT / "policies" / "index.json").read_text())["policies"]
+    metadata = next((item for item in entries if item["id"] == policy_id), None)
+    if not metadata:
+        return False
+    policy_path = ROOT / metadata["policy_path"]
+    return policy_path.exists() and hashlib.sha256(policy_path.read_bytes()).hexdigest() == metadata["policy_sha256"]
 
 
 def engine(command):
@@ -120,20 +124,19 @@ class Handler(BaseHTTPRequestHandler):
         if bits[:1] != ["api"]:
             raise LookupError("endpoint not found")
         if method == "GET" and bits == ["api", "health"]:
-            policy_ok = trained_policy_ok()
+            policy_ok = trained_policy_ok("cfr2") and trained_policy_ok("adaptive")
             return {"ok": ENGINE.exists() and policy_ok, "engine": str(ENGINE.name), "ruleset": RULESET, "policy_ok": policy_ok}
         if method == "GET" and bits == ["api", "rules"]:
             return {"version": RULESET, "faces": 6, "wild": False, "dice_per_player": 5, "target_score": 5, "bid_order": "quantity only", "next_starter": "round loser"}
         if method == "GET" and bits == ["api", "agents"]:
-            policy = json.loads((ROOT / "policies" / "fixed5_cfr.json").read_text())
-            policy_ok = trained_policy_ok()
-            return {"agents": [{"id": a, "policy_version": policy["policy_id"] if a in {"cfr", "adaptive"} else "fixed5_heuristic_v1", "available": policy_ok if a in {"cfr", "adaptive"} else True, "trained": a == "cfr", "uses_trained_base": a == "adaptive", "scope": "approximate one-round action abstraction" if a == "cfr" else ("public-outcome model plus approximate CFR base" if a == "adaptive" else "heuristic")} for a in sorted(AGENTS)]}
+            policy_versions = {"cfr2": "fixed5_cfr_v2_100k", "adaptive": "fixed5_cfr_100k"}
+            return {"agents": [{"id": a, "policy_version": policy_versions.get(a, "fixed5_heuristic_v1"), "available": trained_policy_ok(a) if a in policy_versions else True, "trained": a == "cfr2", "uses_trained_base": a == "adaptive", "scope": "wider imperfect-recall one-round CFR abstraction" if a == "cfr2" else ("public-outcome model plus original CFR base" if a == "adaptive" else "heuristic")} for a in sorted(AGENTS)]}
         if method == "POST" and bits == ["api", "matches"]:
             request = self.body()
             n, agent = request.get("n", 5), request.get("agent", "probability")
             if n != 5 or agent not in AGENTS:
                 raise ValueError("this game requires five dice and a supported agent")
-            if agent in {"cfr", "adaptive"} and not trained_policy_ok():
+            if agent in {"cfr2", "adaptive"} and not trained_policy_ok(agent):
                 raise ValueError("trained policy checksum failed")
             result = engine({"op": "new", "n": 5, "agent": agent})
             match_id = secrets.token_urlsafe(18)
@@ -146,17 +149,19 @@ class Handler(BaseHTTPRequestHandler):
             completed = [s for s in states if s.get("ruleset") == RULESET and s.get("status") == "COMPLETED"]
             return {"completed_matches": len(completed), "human_wins": sum(s.get("winner") == "HUMAN" for s in completed), "ai_wins": sum(s.get("winner") == "AI" for s in completed)}
         if method == "GET" and bits == ["api", "research", "summary"]:
-            runs = []
+            curated = ROOT / "docs" / "research_runs.json"
+            runs_by_id = {item["run_id"]: item for item in json.loads(curated.read_text())} if curated.exists() else {}
             for path in sorted((ROOT / "experiments" / "runs").glob("*/summary.json")):
                 manifest = path.parent / "manifest.json"
                 manifest_data = json.loads(manifest.read_text()) if manifest.exists() else {}
                 if manifest_data.get("status") == "completed" and manifest_data.get("ruleset") == RULESET:
                     item = json.loads(path.read_text())
                     if "results" in item:
-                        item["provenance"] = {"seed_offset": manifest_data.get("seed_offset"), "engine_sha256": manifest_data.get("engine_sha256"), "policy_sha256": manifest_data.get("policy_sha256")}
+                        item["provenance"] = {"seed_offset": manifest_data.get("seed_offset"), "engine_sha256": manifest_data.get("engine_sha256"), "policy_sha256": manifest_data.get("policy_sha256"), "policy_sha256_by_file": manifest_data.get("policy_sha256_by_file", {})}
                         if item.get("run_id") in {"fixed5_five_agent_holdout_200", "fixed5_hard_holdout_200"}:
                             item["warning"] = "Historical adaptive rows are excluded from promotion after a seat-symmetry bug; CFR pairings remain valid."
-                        runs.append(item)
+                        runs_by_id[item["run_id"]] = item
+            runs = sorted(runs_by_id.values(), key=lambda item: item["run_id"])
             return {"status": "completed" if runs else "no completed evaluation", "runs": runs}
         if len(bits) >= 3 and bits[:2] == ["api", "matches"]:
             match_id = bits[2]
@@ -176,6 +181,19 @@ class Handler(BaseHTTPRequestHandler):
                         return match_response(con, match_id, v)
                 if bits[3:] == ["events"]:
                     return {"events": v["events"]}
+                if bits[3:] == ["research"]:
+                    if s.get("status") != "COMPLETED":
+                        raise RuntimeError("match research is available after the final score")
+                    return {
+                        "id": match_id,
+                        "agent": s["agent"],
+                        "winner": s["winner"],
+                        "scores": s["scores"],
+                        "rounds": s["round"],
+                        "decisions": s.get("ai_decisions", []),
+                        "reveals": [e for e in v["events"] if e["type"] == "reveal"],
+                        "method": "Recorded private AI hand, public bid, chosen action, and pre-action policy weight. Truth probabilities are binomial priors over five unseen dice, not strategic posteriors.",
+                    }
                 if len(bits) == 5 and bits[3] == "analysis":
                     round_index = int(bits[4])
                     reveals = [e for e in v["events"] if e["type"] == "reveal" and e["round"] == round_index]

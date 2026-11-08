@@ -1,0 +1,88 @@
+{
+  "status": "completed",
+  "run_id": "fixed5_cfr_v2_screen_100",
+  "n": 5,
+  "completed_matches": 800,
+  "results": {
+    "cfr2_vs_cfr_seat_0": {
+      "wins": 61,
+      "matches": 100,
+      "win_rate": 0.61,
+      "wilson95": [
+        0.5120283616749817,
+        0.699832780680298
+      ]
+    },
+    "cfr2_vs_cfr_seat_1": {
+      "wins": 57,
+      "matches": 100,
+      "win_rate": 0.57,
+      "wilson95": [
+        0.4721521169586435,
+        0.6626686099947162
+      ]
+    },
+    "cfr2_vs_probability_seat_0": {
+      "wins": 68,
+      "matches": 100,
+      "win_rate": 0.68,
+      "wilson95": [
+        0.5833719774632081,
+        0.7633098918454312
+      ]
+    },
+    "cfr2_vs_probability_seat_1": {
+      "wins": 72,
+      "matches": 100,
+      "win_rate": 0.72,
+      "wilson95": [
+        0.6251178763865427,
+        0.7986044083240164
+      ]
+    },
+    "cfr2_vs_high_call_seat_0": {
+      "wins": 81,
+      "matches": 100,
+      "win_rate": 0.81,
+      "wilson95": [
+        0.7222097592919214,
+        0.8748534600729574
+      ]
+    },
+    "cfr2_vs_high_call_seat_1": {
+      "wins": 85,
+      "matches": 100,
+      "win_rate": 0.85,
+      "wilson95": [
+        0.7671626666784216,
+        0.906940968088377
+      ]
+    },
+    "cfr2_vs_aggressive_seat_0": {
+      "wins": 100,
+      "matches": 100,
+      "win_rate": 1.0,
+      "wilson95": [
+        0.9630051925239981,
+        0.9999999999999999
+      ]
+    },
+    "cfr2_vs_aggressive_seat_1": {
+      "wins": 100,
+      "matches": 100,
+      "win_rate": 1.0,
+      "wilson95": [
+        0.9630051925239981,
+        0.9999999999999999
+      ]
+    }
+  },
+  "decision_count": 18739,
+  "policy_hits": {
+    "aggressive": 0,
+    "cfr": 2513,
+    "cfr2": 7555,
+    "high_call": 0,
+    "probability": 0
+  }
+}

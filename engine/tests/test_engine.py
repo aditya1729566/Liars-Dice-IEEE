@@ -58,8 +58,21 @@ class EngineTests(unittest.TestCase):
         replied=call({'op':'act','state':opened['state'],'action':human_bid})[1]
         self.assertTrue(any(e.get('player')=='HUMAN' for e in replied['view']['events'] if e['type']=='bid'))
         self.assertTrue(all('hands' not in e for e in replied['view']['events'] if e['type']!='reveal'))
+    def test_ai_decision_record_uses_only_its_hand_and_stays_private(self):
+        opened=call({'op':'new','n':5,'seed':123,'agent':'cfr'})[1]
+        self.assertNotIn('ai_decisions',opened['view'])
+        self.assertTrue(opened['state']['ai_decisions'])
+        decision=opened['state']['ai_decisions'][0]
+        self.assertEqual(decision['hand'],opened['state']['hands'][1])
+        self.assertIsNone(decision['current_bid_truth_prior'])
+        action=decision['action']
+        expected=call({'op':'prior','q':action['q'],'f':action['f'],'hand':decision['hand'],'unknown':5})[1]['probability']
+        self.assertAlmostEqual(decision['action_truth_prior'],expected)
+        self.assertTrue(0<=decision['policy_probability']<=1)
+        self.assertTrue(decision['policy_options'])
+        self.assertTrue(all(0<=item['weight']<=1 for item in decision['policy_options']))
     def test_trained_agents_choose_legal_actions(self):
-        hits={'cfr':0,'adaptive':0}
+        hits={'cfr':0,'adaptive':0,'cfr2':0}
         for agent in hits:
             for seed in range(30,40):
                 s=call({'op':'new','n':5,'seed':seed,'agent':agent,'agent_human':'probability','auto_ai':False})[1]['state']
@@ -77,8 +90,9 @@ class EngineTests(unittest.TestCase):
                 self.assertTrue(call({'op':'replay','state':s})[1]['valid'])
         self.assertGreater(hits['cfr'],0)
         self.assertGreater(hits['adaptive'],0)
+        self.assertGreater(hits['cfr2'],0)
     def test_ai_choice_does_not_use_hidden_human_dice(self):
-        for agent in ('probability','cfr','adaptive'):
+        for agent in ('probability','cfr','adaptive','cfr2'):
             s=call({'op':'new','n':5,'seed':42,'agent':agent,'auto_ai':False})[1]['state']
             s['turn']=1
             variants=[]

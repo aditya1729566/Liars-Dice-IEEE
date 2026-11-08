@@ -1,0 +1,61 @@
+{
+  "runs": [
+    "fixed5_cfr_v2_confirm_400",
+    "fixed5_truthful_probe_200"
+  ],
+  "direct_v2_vs_legacy": {
+    "wins": 523,
+    "matches": 800,
+    "win_rate": 0.65375,
+    "wilson95": [
+      0.6201164311992543,
+      0.6859140106191338
+    ]
+  },
+  "versus_probability": {
+    "cfr2": {
+      "wins": 594,
+      "matches": 800,
+      "win_rate": 0.7425,
+      "wilson95": [
+        0.7110909929128846,
+        0.7715911673535163
+      ]
+    },
+    "cfr": {
+      "wins": 613,
+      "matches": 800,
+      "win_rate": 0.76625,
+      "wilson95": [
+        0.7356927801990337,
+        0.7942623751450041
+      ]
+    }
+  },
+  "paired_v2_minus_legacy_vs_probability": {
+    "v2_minus_legacy": -0.02375,
+    "paired_bootstrap_95": [
+      -0.06125,
+      0.015
+    ],
+    "seed_blocks": 400
+  },
+  "paired_v2_minus_legacy_vs_truthful": {
+    "v2_minus_legacy": 0.18,
+    "paired_bootstrap_95": [
+      0.125,
+      0.235
+    ],
+    "seed_blocks": 200
+  },
+  "v2_decision_latency_ms": {
+    "count": 21190,
+    "p95": 40.249915909953415,
+    "maximum": 145.29554196633399,
+    "policy_hits": 21154
+  },
+  "errors": 0,
+  "bootstrap_seed": 1729,
+  "bootstrap_resamples": 20000,
+  "block_definition": "same seed and both seats, one opponent per comparison"
+}

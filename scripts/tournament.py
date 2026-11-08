@@ -38,20 +38,26 @@ def main():
     ap.add_argument('--focus',help='evaluate only pairings containing this agent')
     args=ap.parse_args()
     if args.n != 5 or not 1<=args.per_seat<=10000:raise SystemExit('this ruleset requires N=5 and per-seat 1..10000')
-    policy_path=ROOT/'policies'/'fixed5_cfr.json'
-    if {'cfr','adaptive'} & set(args.agents):
-        if not policy_path.exists():raise SystemExit('trained agents require policies/fixed5_cfr.json')
-        policy=json.loads(policy_path.read_text())
+    policy_paths={
+        'cfr':ROOT/'policies'/'fixed5_cfr.json',
+        'adaptive':ROOT/'policies'/'fixed5_cfr.json',
+        'cfr2':ROOT/'policies'/'fixed5_cfr_v2.json',
+    }
+    used_policy_paths=sorted({policy_paths[a] for a in args.agents if a in policy_paths})
+    for path in used_policy_paths:
+        if not path.exists():raise SystemExit(f'trained agent requires {path.relative_to(ROOT)}')
+        policy=json.loads(path.read_text())
         if policy.get('ruleset')!='fixed5_score5_quantity_only_v1' or not policy.get('policy'):
-            raise SystemExit('trained policy missing or incompatible')
+            raise SystemExit(f'trained policy missing or incompatible: {path.relative_to(ROOT)}')
     folder=ROOT/'experiments'/'runs'/args.run_id
     folder.mkdir(parents=True,exist_ok=False)
     plan=list(itertools.combinations(args.agents,2))
     if args.focus:
         plan=[pair for pair in plan if args.focus in pair]
         if not plan:raise SystemExit('focus agent has no pairings')
-    policy_hash=hashlib.sha256(policy_path.read_bytes()).hexdigest() if policy_path.exists() else None
-    manifest={'run_id':args.run_id,'status':'started','ruleset':'fixed5_score5_quantity_only_v1','n':args.n,'per_seat':args.per_seat,'pairings':plan,'focus':args.focus,'seed_offset':args.seed_offset,'paired_seeds':args.paired_seeds,'command':' '.join(os.sys.argv),'started_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'hardware':platform.platform(),'python':platform.python_version(),'engine_sha256':hashlib.sha256(BIN.read_bytes()).hexdigest(),'policy_sha256':policy_hash}
+    policy_hashes={str(path.relative_to(ROOT)):hashlib.sha256(path.read_bytes()).hexdigest() for path in used_policy_paths}
+    policy_hash=next(iter(policy_hashes.values())) if len(policy_hashes)==1 else None
+    manifest={'run_id':args.run_id,'status':'started','ruleset':'fixed5_score5_quantity_only_v1','n':args.n,'per_seat':args.per_seat,'pairings':plan,'focus':args.focus,'seed_offset':args.seed_offset,'paired_seeds':args.paired_seeds,'command':' '.join(os.sys.argv),'started_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'hardware':platform.platform(),'python':platform.python_version(),'engine_sha256':hashlib.sha256(BIN.read_bytes()).hexdigest(),'policy_sha256':policy_hash,'policy_sha256_by_file':policy_hashes}
     (folder/'manifest.json').write_text(json.dumps(manifest,indent=2))
     db=sqlite3.connect(folder/'evaluation.sqlite3')
     db.executescript('CREATE TABLE matches(id INTEGER PRIMARY KEY, agent_a TEXT, agent_b TEXT, seed INTEGER, winner TEXT, rounds INTEGER, actions INTEGER, duration_ms REAL);CREATE TABLE decisions(match_id INTEGER, action_index INTEGER, round_index INTEGER, player TEXT, agent TEXT, observation_json TEXT, action_json TEXT, latency_ms REAL, policy_hit INTEGER);CREATE TABLE rounds(match_id INTEGER, round_index INTEGER, reveal_json TEXT);CREATE TABLE errors(match_id INTEGER,error TEXT);')
@@ -66,7 +72,8 @@ def main():
                 wins=0
                 for index in range(args.per_seat):
                     if BIN.stat().st_mtime_ns!=binary_mtime:raise RuntimeError('engine binary changed during run')
-                    if policy_hash and hashlib.sha256(policy_path.read_bytes()).hexdigest()!=policy_hash:raise RuntimeError('policy changed during run')
+                    for path in used_policy_paths:
+                        if hashlib.sha256(path.read_bytes()).hexdigest()!=policy_hashes[str(path.relative_to(ROOT))]:raise RuntimeError('policy changed during run')
                     if os.statvfs(folder).f_bavail*os.statvfs(folder).f_frsize<2*1024**3:raise RuntimeError('free disk guard reached')
                     if (folder/'evaluation.sqlite3').stat().st_size>int(1.5*1024**3):raise RuntimeError('artifact cap reached')
                     seed=args.seed_offset+index if args.paired_seeds else args.seed_offset+pair_index*args.per_seat+index

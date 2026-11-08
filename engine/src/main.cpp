@@ -39,7 +39,7 @@ static void roll(json& s){
 static json new_game(const json& c){
   if(c.contains("n")&&c["n"]!=5)throw runtime_error("this ruleset requires exactly five dice per player");
   uint64_t seed=c.contains("seed")?c["seed"].get<uint64_t>():((uint64_t(random_device{}())<<32)^random_device{}());
-  json s={{"ruleset",RULESET},{"counts",json::array({5,5})},{"scores",json::array({0,0})},{"round",1},{"starter",0},{"turn",0},{"bid",nullptr},{"bidder",-1},{"phase","BIDDING"},{"status","ACTIVE"},{"winner",nullptr},{"version",0},{"events",json::array()},{"initial_seed",seed},{"rng",seed},{"policy_rng",seed^0xa5a5a5a55a5a5a5aULL},{"agent",c.value("agent",string("probability"))},{"agent_human",c.value("agent_human",string("random"))}};
+  json s={{"ruleset",RULESET},{"counts",json::array({5,5})},{"scores",json::array({0,0})},{"round",1},{"starter",0},{"turn",0},{"bid",nullptr},{"bidder",-1},{"phase","BIDDING"},{"status","ACTIVE"},{"winner",nullptr},{"version",0},{"events",json::array()},{"ai_decisions",json::array()},{"initial_seed",seed},{"rng",seed},{"policy_rng",seed^0xa5a5a5a55a5a5a5aULL},{"agent",c.value("agent",string("probability"))},{"agent_human",c.value("agent_human",string("random"))}};
   s["starter"]=int(next64(s)%2);roll(s);return s;
 }
 static void apply_action(json& s,const json& a){
@@ -70,18 +70,43 @@ static json choose(json& s,int player){
   json acts=legal(s);if(acts.empty())throw runtime_error("no actions");
   string agent=player==1?s.value("agent",string("random")):s.value("agent_human",string("random"));
   s["last_policy_hit"]=false;
+  s["last_policy_options"]=json::array();
   if(agent=="switcher")agent=s["round"].get<int>()<=3?"aggressive":"conservative";
-  if(agent=="random")return acts[size_t(next64(s,"policy_rng")%acts.size())];
-  if(agent=="always_call"&&!s["bid"].is_null())return {{"type","call"}};
   json hand=s["hands"][player];double callP=s["bid"].is_null()?1:truth_prior(s["bid"]["q"],s["bid"]["f"],hand,5);
+  auto finish=[&](const json& action,const string& source,const json& policyProbability,const string& policyKey)->json{
+    if(player==1){
+      json trace={{"round",s["round"]},{"sequence",s["version"].get<int>()+1},{"scores",s["scores"]},{"hand",hand},{"current_bid",s["bid"]},{"current_bid_truth_prior",s["bid"].is_null()?json(nullptr):json(callP)},{"action",action},{"action_truth_prior",action["type"]=="bid"?json(truth_prior(action["q"],action["f"],hand,5)):json(nullptr)},{"source",source},{"policy_probability",policyProbability},{"policy_options",s["last_policy_options"]},{"policy_key",policyKey.empty()?json(nullptr):json(policyKey)},{"policy_id",agent=="cfr2"?"fixed5_cfr_v2_100k":(agent=="cfr"||agent=="adaptive"?"fixed5_cfr_100k":"fixed5_heuristic_v1")}};
+      if(!s.contains("ai_decisions"))s["ai_decisions"]=json::array();
+      s["ai_decisions"].push_back(trace);
+    }
+    return action;
+  };
+  if(agent=="random")return finish(acts[size_t(next64(s,"policy_rng")%acts.size())],"uniform_random",nullptr,"");
+  if(agent=="always_call"&&!s["bid"].is_null())return finish({{"type","call"}},"always_call",nullptr,"");
   int modal=1,modalCount=0;
   for(int face=1;face<=6;face++){int count=0;for(const auto& d:hand)if(d.get<int>()==face)count++;if(count>modalCount){modal=face;modalCount=count;}}
-  if(agent=="cfr"||agent=="adaptive"){
+  if(agent=="truthful"){
+    int current=s["bid"].is_null()?0:s["bid"]["q"].get<int>();
+    for(int target=min(5,modalCount);target>current;target--)
+      for(int candidateFace=1;candidateFace<=6;candidateFace++){
+        int count=0;for(const auto& d:hand)if(d.get<int>()==candidateFace)count++;
+        if(count>=target)return finish({{"type","bid"},{"q",target},{"f",candidateFace}},"truthful_probe",nullptr,"");
+      }
+  }
+  if(agent=="cfr"||agent=="adaptive"||agent=="cfr2"){
     int q=s["bid"].is_null()?0:s["bid"]["q"].get<int>();
     int f=s["bid"].is_null()?0:s["bid"]["f"].get<int>();
     int k=0;for(const auto& d:hand)if(d.get<int>()==f)k++;
     string key=to_string(s["starter"].get<int>())+"|"+to_string(player)+"|"+to_string(modal)+"|"+to_string(modalCount)+"|"+to_string(q)+"|"+to_string(f)+"|"+to_string(k);
-    std::ifstream file("policies/fixed5_cfr.json");
+    if(agent=="cfr2"){
+      int previousQ=0,previousF=0,seenBids=0;
+      for(auto it=s["events"].rbegin();it!=s["events"].rend();++it){
+        if(it->value("round",0)!=s["round"].get<int>())continue;
+        if(it->value("type",string(""))=="bid"&&++seenBids==2){previousQ=it->at("q");previousF=it->at("f");break;}
+      }
+      key=to_string(s["starter"].get<int>())+"|"+to_string(player)+"|"+to_string(modal)+"|"+to_string(modalCount)+"|"+to_string(previousQ)+"|"+to_string(previousF)+"|"+to_string(q)+"|"+to_string(f)+"|"+to_string(k);
+    }
+    std::ifstream file(agent=="cfr2"?"policies/fixed5_cfr_v2.json":"policies/fixed5_cfr.json");
     if(file){try{
       json saved=json::parse(file);if(saved.value("ruleset",string(""))!=RULESET)throw runtime_error("policy ruleset mismatch");
       const json& table=saved.at("policy");
@@ -90,14 +115,18 @@ static json choose(json& s,int player){
         for(const auto& a:acts){string akey=a["type"]=="call"?"C":to_string(a["q"].get<int>())+"-"+to_string(a["f"].get<int>());
           double w=table[key].value(akey,0.0);if(w>0){candidates.push_back({a,w});total+=w;}}
         if(total>0){s["last_policy_hit"]=true;
+          vector<pair<string,double>> options;
+          for(const auto& item:candidates){string akey=item.first["type"]=="call"?"C":to_string(item.first["q"].get<int>())+"-"+to_string(item.first["f"].get<int>());options.push_back({akey,item.second/total});}
+          sort(options.begin(),options.end(),[](const auto& a,const auto& b){return a.second>b.second;});
+          for(size_t i=0;i<min(size_t(3),options.size());i++)s["last_policy_options"].push_back({{"action",options[i].first},{"weight",options[i].second}});
           bool exploit=false;
           if(agent=="adaptive"){
             int seen=0;for(const auto& e:s["events"])if(e.value("type",string(""))=="reveal"&&e.value("bidder",string(""))==name(other(player)))seen++;
             exploit=seen>=3&&next64(s,"policy_rng")%100<25;
           }
           if(!exploit){double draw=double(next64(s,"policy_rng")%1000000)/1000000*total;
-            for(const auto& item:candidates){draw-=item.second;if(draw<=0)return item.first;}return candidates.back().first;}
-          s["last_policy_hit"]=false;
+            for(const auto& item:candidates){draw-=item.second;if(draw<=0)return finish(item.first,"sampled_cfr",item.second/total,key);}return finish(candidates.back().first,"sampled_cfr",candidates.back().second/total,key);}
+          s["last_policy_hit"]=false;s["last_policy_options"]=json::array();
         }
       }
     }catch(const exception&){}
@@ -108,15 +137,15 @@ static json choose(json& s,int player){
   double adaptiveRate=double(bluffs+1)/double(seen+2);
   double threshold=agent=="aggressive"?0.18:(agent=="conservative"?0.25:(agent=="high_call"?0.60:0.44));
   double adjustedCallP=agent=="adaptive"&&seen>=3?std::clamp(callP-(adaptiveRate-0.5)*0.6,0.0,1.0):callP;
-  if(!s["bid"].is_null()&&adjustedCallP<threshold)return {{"type","call"}};
+  if(!s["bid"].is_null()&&adjustedCallP<threshold)return finish({{"type","call"}},agent=="adaptive"?"adaptive_public_outcomes":"probability_heuristic",nullptr,"");
   double best=-1e9;json selected=acts.back();
   for(const auto& a:acts){if(a["type"]!="bid")continue;int q=a["q"],f=a["f"];
     double p=truth_prior(q,f,hand,5);double score=p-0.022*q;
     if(agent=="aggressive")score+=0.16*q+0.02*double(next64(s,"policy_rng")%100)/100;
     if(score>best){best=score;selected=a;}}
-  if(selected["type"]=="call")return selected;
-  if(best<0.28&&!s["bid"].is_null())return {{"type","call"}};
-  return selected;
+  if(selected["type"]=="call")return finish(selected,"probability_heuristic",nullptr,"");
+  if(best<0.28&&!s["bid"].is_null())return finish({{"type","call"}},agent=="adaptive"?"adaptive_public_outcomes":"probability_heuristic",nullptr,"");
+  return finish(selected,agent=="adaptive"?"adaptive_public_outcomes":"probability_heuristic",nullptr,"");
 }
 static void auto_ai(json& s){
   if(s["phase"]=="BIDDING"&&s["turn"]==1){json a=choose(s,1);apply_action(s,a);}

@@ -1,0 +1,68 @@
+{
+  "status": "completed",
+  "run_id": "fixed5_truthful_probe_200",
+  "n": 5,
+  "completed_matches": 1200,
+  "results": {
+    "cfr2_vs_cfr_seat_0": {
+      "wins": 138,
+      "matches": 200,
+      "win_rate": 0.69,
+      "wilson95": [
+        0.622826945087378,
+        0.75001157266366
+      ]
+    },
+    "cfr2_vs_cfr_seat_1": {
+      "wins": 125,
+      "matches": 200,
+      "win_rate": 0.625,
+      "wilson95": [
+        0.5561417515728713,
+        0.6891467469475485
+      ]
+    },
+    "cfr2_vs_truthful_seat_0": {
+      "wins": 119,
+      "matches": 200,
+      "win_rate": 0.595,
+      "wilson95": [
+        0.5257958199999483,
+        0.6606234388755706
+      ]
+    },
+    "cfr2_vs_truthful_seat_1": {
+      "wins": 110,
+      "matches": 200,
+      "win_rate": 0.55,
+      "wilson95": [
+        0.48075488574571107,
+        0.6173605136624569
+      ]
+    },
+    "cfr_vs_truthful_seat_0": {
+      "wins": 80,
+      "matches": 200,
+      "win_rate": 0.4,
+      "wilson95": [
+        0.3346046396837895,
+        0.46916456149987484
+      ]
+    },
+    "cfr_vs_truthful_seat_1": {
+      "wins": 77,
+      "matches": 200,
+      "win_rate": 0.385,
+      "wilson95": [
+        0.3203319691791383,
+        0.4540026121820756
+      ]
+    }
+  },
+  "decision_count": 31572,
+  "policy_hits": {
+    "cfr": 8319,
+    "cfr2": 9756,
+    "truthful": 0
+  }
+}

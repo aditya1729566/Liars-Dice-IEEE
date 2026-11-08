@@ -1,50 +1,68 @@
 {
   "status": "completed",
-  "run_id": "fixed5_probability_controls_400",
+  "run_id": "fixed5_cfr_v2_confirm_400",
   "n": 5,
-  "completed_matches": 1600,
+  "completed_matches": 2400,
   "results": {
-    "probability_vs_conservative_seat_0": {
-      "wins": 199,
+    "cfr2_vs_cfr_seat_0": {
+      "wins": 264,
       "matches": 400,
-      "win_rate": 0.4975,
+      "win_rate": 0.66,
       "wilson95": [
-        0.44875800198627125,
-        0.5462895612167272
+        0.6122507874202215,
+        0.7047051675878807
       ]
     },
-    "probability_vs_conservative_seat_1": {
-      "wins": 201,
+    "cfr2_vs_cfr_seat_1": {
+      "wins": 259,
       "matches": 400,
-      "win_rate": 0.5025,
+      "win_rate": 0.6475,
       "wilson95": [
-        0.4537104387832728,
-        0.5512419980137288
+        0.5994796194705074,
+        0.6927141515525868
       ]
     },
-    "probability_vs_high_call_seat_0": {
-      "wins": 386,
+    "cfr2_vs_probability_seat_0": {
+      "wins": 293,
       "matches": 400,
-      "win_rate": 0.965,
+      "win_rate": 0.7325,
       "wilson95": [
-        0.942114344143788,
-        0.9790389000985089
+        0.6870582978814362,
+        0.7735183242397125
       ]
     },
-    "probability_vs_high_call_seat_1": {
-      "wins": 380,
+    "cfr2_vs_probability_seat_1": {
+      "wins": 301,
       "matches": 400,
-      "win_rate": 0.95,
+      "win_rate": 0.7525,
       "wilson95": [
-        0.9240357990869275,
-        0.9674028243733599
+        0.7079383715578094,
+        0.7922577449393517
+      ]
+    },
+    "cfr_vs_probability_seat_0": {
+      "wins": 310,
+      "matches": 400,
+      "win_rate": 0.775,
+      "wilson95": [
+        0.7315721378719925,
+        0.8131959097981832
+      ]
+    },
+    "cfr_vs_probability_seat_1": {
+      "wins": 303,
+      "matches": 400,
+      "win_rate": 0.7575,
+      "wilson95": [
+        0.7131767240346103,
+        0.7969242660565541
       ]
     }
   },
-  "decision_count": 36069,
+  "decision_count": 69298,
   "policy_hits": {
-    "conservative": 0,
-    "high_call": 0,
+    "cfr": 21071,
+    "cfr2": 21154,
     "probability": 0
   }
 }

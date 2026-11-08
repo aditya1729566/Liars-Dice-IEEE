@@ -14,6 +14,22 @@
       "policy_sha256": "9054a212e2865189ee9358e344e3fba48298408edb96fbf8cc343e75d005b977",
       "training_run": "fixed5_cfr_100k",
       "evaluation_run": "fixed5_confirmatory_1000",
+      "champion": false
+    },
+    {
+      "id": "fixed5_cfr_v2_100k",
+      "ruleset": "fixed5_score5_quantity_only_v1",
+      "agent_type": "sampled CFR candidate with wider action and public-history abstraction",
+      "training_objective": "one-round point utility, imperfect-recall action abstraction",
+      "training_iterations": 100000,
+      "created_utc": "2026-11-08T08:05:21Z",
+      "seed": 20261108,
+      "parent_checkpoint": "policies/fixed5_cfr_v2.checkpoint.pkl",
+      "checkpoint_sha256": "07cfd3b80c75f8d68f1b50c4667755b45a331c5a73b906096f33769a32fadbb1",
+      "policy_path": "policies/fixed5_cfr_v2.json",
+      "policy_sha256": "d99c9c002989c65fed62348b8ea623974436b7ebc75f9a0821c6e5edee99d9a8",
+      "training_run": "fixed5_cfr_v2_100k",
+      "evaluation_run": "fixed5_cfr_v2_confirm_400",
       "champion": true
     }
   ]

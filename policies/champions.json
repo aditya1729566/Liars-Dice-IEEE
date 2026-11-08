@@ -1,16 +1,37 @@
 {
   "ruleset": "fixed5_score5_quantity_only_v1",
   "active_champion": {
+    "agent": "cfr2",
+    "policy_id": "fixed5_cfr_v2_100k",
+    "policy_sha256": "d99c9c002989c65fed62348b8ea623974436b7ebc75f9a0821c6e5edee99d9a8",
+    "evaluation_run": "fixed5_cfr_v2_confirm_400",
+    "direct_wins": 523,
+    "direct_matches": 800,
+    "direct_wilson_95": [
+      0.6201164311992543,
+      0.6859140106191338
+    ],
+    "probability_wins": 594,
+    "probability_matches": 800,
+    "probability_wilson_95": [
+      0.7110909929128846,
+      0.7715911673535163
+    ]
+  },
+  "candidate_policy": "fixed5_cfr_v2_100k",
+  "candidate_policy_sha256": "d99c9c002989c65fed62348b8ea623974436b7ebc75f9a0821c6e5edee99d9a8",
+  "reason": "V2 passed the registered direct, probability floor, legality, and latency gates. Same-seed v2 performance versus probability was 2.375 percentage points below the old CFR estimate; this tradeoff and the post hoc truthful-bid probe are reported separately. Adaptive remains experimental.",
+  "legacy_policy": "legacy/n1_champion.json",
+  "legacy_policy_compatible": false,
+  "previous_champion": {
     "agent": "cfr",
     "policy_id": "fixed5_cfr_100k",
     "policy_sha256": "9054a212e2865189ee9358e344e3fba48298408edb96fbf8cc343e75d005b977",
     "evaluation_run": "fixed5_confirmatory_1000",
     "paired_league_improvement": 0.0715,
-    "paired_bootstrap_95": [0.05725, 0.0855]
-  },
-  "candidate_policy": "fixed5_cfr_100k",
-  "candidate_policy_sha256": "9054a212e2865189ee9358e344e3fba48298408edb96fbf8cc343e75d005b977",
-  "reason": "CFR passed the preregistered paired-seed confirmation and hard-opponent robustness gates; adaptive remains experimental.",
-  "legacy_policy": "legacy/n1_champion.json",
-  "legacy_policy_compatible": false
+    "paired_bootstrap_95": [
+      0.05725,
+      0.0855
+    ]
+  }
 }

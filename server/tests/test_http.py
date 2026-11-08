@@ -22,7 +22,7 @@ class HttpTests(unittest.TestCase):
             try:
                 self.assertTrue(send('/api/health')['policy_ok'])
                 listed=send('/api/agents')['agents']
-                self.assertEqual({x['id'] for x in listed},{'random','probability','aggressive','cfr','adaptive'})
+                self.assertEqual({x['id'] for x in listed},{'random','probability','aggressive','cfr2','adaptive'})
                 self.assertTrue(all(x['available'] for x in listed))
                 self.assertFalse(next(x for x in listed if x['id']=='adaptive')['trained'])
                 self.assertTrue(next(x for x in listed if x['id']=='adaptive')['uses_trained_base'])
@@ -32,11 +32,33 @@ class HttpTests(unittest.TestCase):
                 self.assertEqual(cors.exception.code,403)
                 with patch.object(app,'trained_policy_ok',return_value=False):
                     with self.assertRaises(urllib.error.HTTPError) as mismatched:
-                        send('/api/matches',{'n':5,'agent':'cfr'})
+                        send('/api/matches',{'n':5,'agent':'cfr2'})
                     self.assertEqual(mismatched.exception.code,400)
-                trained=send('/api/matches',{'n':5,'agent':'cfr'})
-                self.assertEqual(trained['agent'],'cfr')
+                trained=send('/api/matches',{'n':5,'agent':'cfr2'})
+                self.assertEqual(trained['agent'],'cfr2')
                 self.assertIsNone(trained['ai_hand'])
+                self.assertNotIn('ai_decisions',trained)
+                with self.assertRaises(urllib.error.HTTPError) as private_report:
+                    send(f"/api/matches/{trained['id']}/research")
+                self.assertEqual(private_report.exception.code,409)
+                for action_index in range(30):
+                    if trained['status']=='COMPLETED':break
+                    if trained['phase']=='ROUND_OVER':
+                        trained=send(f"/api/matches/{trained['id']}/next-round",{'expected_version':trained['version'],'idempotency_key':f'research-next-{action_index:03d}'})
+                    else:
+                        action={'type':'call'} if any(a['type']=='call' for a in trained['legal_actions']) else {'type':'bid','q':10,'f':1}
+                        trained=send(f"/api/matches/{trained['id']}/actions",{'action':action,'expected_version':trained['version'],'idempotency_key':f'research-act-{action_index:03d}'})
+                self.assertEqual(trained['status'],'COMPLETED')
+                report=send(f"/api/matches/{trained['id']}/research")
+                self.assertEqual(report['scores'],trained['scores'])
+                self.assertTrue(report['decisions'])
+                self.assertTrue(all(0<=d['current_bid_truth_prior']<=1 for d in report['decisions'] if d['current_bid_truth_prior'] is not None))
+                self.assertTrue(all(0<=d['action_truth_prior']<=1 for d in report['decisions'] if d['action_truth_prior'] is not None))
+                self.assertEqual(len(report['reveals']),trained['round'])
+                self.assertTrue(send(f"/api/matches/{trained['id']}",method='DELETE')['deleted'])
+                with self.assertRaises(urllib.error.HTTPError) as deleted_report:
+                    send(f"/api/matches/{trained['id']}/research")
+                self.assertEqual(deleted_report.exception.code,404)
                 created=send('/api/matches',{'n':5,'agent':'probability'})
                 self.assertNotIn('rng',created)
                 self.assertNotIn('hands',created)
