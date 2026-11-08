@@ -143,7 +143,10 @@ async function dispatch(method: string, request: Request, bits: string[]): Promi
         await put(pathFor(id), JSON.stringify(next), { access: 'private', contentType: 'application/json', allowOverwrite: true, ifMatch: etag });
         if (result.state.status === 'COMPLETED' && result.state.winner) await put(`completed/${result.state.winner}/${id}.json`, '{}', { access: 'private', contentType: 'application/json' });
         return outgoing;
-      } catch (error) { if (!(error instanceof BlobPreconditionFailedError)) throw error; }
+      } catch (error) {
+        if (!(error instanceof BlobPreconditionFailedError)) throw error;
+        console.error('match write conflict', { attempt, etag, message: error.message });
+      }
     }
     throw new ApiError('concurrent update; retry the action', 409);
   }
