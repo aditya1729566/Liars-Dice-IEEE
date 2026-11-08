@@ -112,6 +112,6 @@ export default function Home() {
 
     {error && <div className="error-toast" role="alert">{error}</div>}
     {tutorial && <div className="tutorial-backdrop" role="dialog" aria-modal="true" aria-label="How to play"><div className="tutorial"><button className="close" aria-label="Close tutorial" onClick={() => setTutorial(false)}>×</button><span className="eyebrow">RULE {tutorialStep + 1} OF 3</span><h2>{['Five dice each', 'Raise the quantity', 'Challenge for a point'][tutorialStep]}</h2><p>{['You see your five dice. The AI sees only its five. Both hands are revealed after a challenge.', 'A bid says how many of all ten dice show one face. A new bid must claim more dice; the face can change.', 'Challenge a claim you think is false. The round winner gets one point. First to five wins.'][tutorialStep]}</p><button className="primary-action" onClick={() => tutorialStep < 2 ? setTutorialStep(tutorialStep + 1) : setTutorial(false)}>{tutorialStep < 2 ? 'Next rule' : 'Start playing'} <span aria-hidden="true">→</span></button></div></div>}
-    <footer><span>BLUFF.EXE</span><span>FIVE DICE / NO WILDS / FIRST TO FIVE</span><span>LOCAL EXHIBITION BUILD</span></footer>
+    <footer><span>BLUFF.EXE</span><span>FIVE DICE / NO WILDS / FIRST TO FIVE</span><span>EXHIBITION BUILD</span></footer>
   </main>;
 }

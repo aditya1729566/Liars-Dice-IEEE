@@ -1,6 +1,10 @@
 # BLUFF.EXE
 
-A local human-versus-AI dice bluffing game for an IEEE exhibition. Both players have five dice throughout the match. A raise must increase the **quantity**; the face may change. Challenge a claim to reveal both hands. The round winner earns one point, and the first to five wins. The C++20 engine owns all rolls, legal actions, scores, and results.
+A human-versus-AI dice bluffing game for an IEEE exhibition, playable in a browser or locally. Both players have five dice throughout the match. A raise must increase the **quantity**; the face may change. Challenge a claim to reveal both hands. The round winner earns one point, and the first to five wins. The C++20 engine owns all rolls, legal actions, scores, and results.
+
+## Play online
+
+[Open BLUFF.EXE](https://liars-dice-ieee.vercel.app). The deployed game uses the same C++ rules engine and stores matches in private Vercel Blob storage. The Research tab gives a complete replay after a match ends. See [deployment notes](docs/vercel-deployment.md) for the runtime and storage design.
 
 ## Run locally
 
@@ -27,4 +31,4 @@ Run `make test` for engine, trainer, and API tests; `make verify` for lint, type
 
 ## Documentation
 
-[Rules](docs/RULES.md) · [Architecture](docs/ARCHITECTURE.md) · [API](docs/API.md) · [Research methods](docs/RESEARCH_METHODS.md) · [Design system](docs/DESIGN_SYSTEM.md) · [Game screenshot](docs/screenshots/bluff-v2-setup.png) · [Replay screenshot](docs/screenshots/bluff-replay-human.png) · [Raw v2 evaluations](evidence/fixed5-cfr-v2-confirm.zip) · [Current state](docs/EXECUTION_STATE.md) · [Evidence](docs/FINAL_REPORT.md)
+[Rules](docs/RULES.md) · [Architecture](docs/ARCHITECTURE.md) · [API](docs/API.md) · [Research methods](docs/RESEARCH_METHODS.md) · [Design system](docs/DESIGN_SYSTEM.md) · [Live game screenshot](docs/screenshots/live-production-reveal.png) · [Replay screenshot](docs/screenshots/bluff-replay-human.png) · [Raw v2 evaluations](evidence/fixed5-cfr-v2-confirm.zip) · [Current state](docs/EXECUTION_STATE.md) · [Evidence](docs/FINAL_REPORT.md)
