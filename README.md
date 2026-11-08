@@ -4,7 +4,7 @@ A human-versus-AI dice bluffing game for an IEEE exhibition, playable in a brows
 
 ## Play online
 
-[Open BLUFF.EXE](https://liars-dice-ieee.vercel.app). The deployed game uses the same C++ rules engine and stores matches in private Vercel Blob storage. The Research tab gives a complete replay after a match ends. See [deployment notes](docs/vercel-deployment.md) for the runtime and storage design.
+[Open BLUFF.EXE](https://liarsdice5.vercel.app). The deployed game uses the same C++ rules engine and stores matches in private Vercel Blob storage. The Research tab gives a complete replay after a match ends. See [deployment notes](docs/vercel-deployment.md) for the runtime and storage design.
 
 ## Run locally
 

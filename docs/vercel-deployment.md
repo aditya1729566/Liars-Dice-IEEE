@@ -1,6 +1,6 @@
 # Vercel deployment
 
-The Vercel project `liars-dice-ieee` builds the `web/` directory as a Next.js app. Its `prebuild` script compiles the C++20 game engine for the build platform and copies only the two checked policies, policy index, and recorded research summary into `web/runtime/`. Next.js includes those files in the API function bundle. The browser calls same-origin `/api/*`; the function runs the engine for every game transition.
+The Vercel project `liars-dice-ieee` serves the public address [liarsdice5.vercel.app](https://liarsdice5.vercel.app) and builds the `web/` directory as a Next.js app. Its `prebuild` script compiles the C++20 game engine for the build platform and copies only the two checked policies, policy index, and recorded research summary into `web/runtime/`. Next.js includes those files in the API function bundle. The browser calls same-origin `/api/*`; the function runs the engine for every game transition.
 
 Production match records live in a **private Vercel Blob store** connected to the project through `BLOB_READ_WRITE_TOKEN`. Each match has a random capability ID. The Blob record contains the authoritative state and idempotency responses; updates use ETag conditional writes and recheck the state version. Completed-match markers provide the public aggregate scoreboard. Research replay is returned only after completion. A match ID grants access to that match; there is no account system. Deleting a visitor match removes both its state and its completed marker.
 
