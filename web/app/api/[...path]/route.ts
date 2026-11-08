@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash, randomBytes } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { BlobPreconditionFailedError, del, get, list, put } from '@vercel/blob';
+import { BlobPreconditionFailedError, del, get, head, list, put } from '@vercel/blob';
 import { buildReplay, truthPrior, type ReplayState } from '../../../lib/replay';
 
 export const dynamic = 'force-dynamic';
@@ -45,7 +45,9 @@ async function readMatch(id: string): Promise<{ match: StoredMatch; etag: string
   if (!result || result.statusCode !== 200 || !result.stream) throw new ApiError('match not found', 404);
   const match = JSON.parse(await new Response(result.stream).text()) as StoredMatch;
   if (match.state.ruleset !== ruleset) throw new ApiError('legacy match uses an obsolete ruleset', 404);
-  return { match, etag: result.blob.etag };
+  const metadata = await head(pathFor(id));
+  if (metadata.etag !== result.blob.etag.replace(/^W\//, '')) throw new ApiError('concurrent update; retry the action', 409);
+  return { match, etag: metadata.etag };
 }
 function response(id: string, match: StoredMatch, view: Record<string, unknown>) {
   return { id, duration_seconds: Math.max(0, Math.floor((Date.now() - match.created) / 1000)), ...view };
