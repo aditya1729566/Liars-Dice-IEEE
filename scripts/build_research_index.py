@@ -19,6 +19,13 @@ def main():
         item = json.loads(path.read_text())
         if 'results' not in item:
             continue
+        metrics_path = path.parent / 'mccfr_metrics.json'
+        if metrics_path.exists():
+            item['mccfr_metrics'] = {'opponents': {
+                opponent: {'paired_seed_cluster95': values['paired_seed_cluster95']}
+                for opponent, values in json.loads(metrics_path.read_text())['opponents'].items()
+                if 'paired_seed_cluster95' in values
+            }}
         item['provenance'] = {key: manifest.get(key) for key in ('seed_offset', 'engine_sha256', 'policy_sha256', 'policy_sha256_by_file')}
         if item['run_id'] in HISTORICAL_ADAPTIVE:
             item['warning'] = 'Historical adaptive rows are excluded from promotion after a seat-symmetry bug; CFR pairings remain valid.'

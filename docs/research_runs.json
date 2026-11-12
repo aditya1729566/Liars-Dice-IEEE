@@ -1169,5 +1169,801 @@
         "policies/fixed5_cfr_v2.json": "d99c9c002989c65fed62348b8ea623974436b7ebc75f9a0821c6e5edee99d9a8"
       }
     }
+  },
+  {
+    "status": "completed",
+    "run_id": "mccfr_confirm_2000_20261112",
+    "n": 5,
+    "completed_matches": 14000,
+    "results": {
+      "mccfr_external_v1_vs_cfr2_seat_0": {
+        "wins": 556,
+        "matches": 1000,
+        "win_rate": 0.556,
+        "wilson95": [
+          0.5250485919968327,
+          0.5865227953614917
+        ]
+      },
+      "mccfr_external_v1_vs_cfr2_seat_1": {
+        "wins": 513,
+        "matches": 1000,
+        "win_rate": 0.513,
+        "wilson95": [
+          0.48202970090916764,
+          0.5438707997275862
+        ]
+      },
+      "mccfr_external_v1_vs_cfr_seat_0": {
+        "wins": 664,
+        "matches": 1000,
+        "win_rate": 0.664,
+        "wilson95": [
+          0.6341458548269566,
+          0.6925989224367074
+        ]
+      },
+      "mccfr_external_v1_vs_cfr_seat_1": {
+        "wins": 643,
+        "matches": 1000,
+        "win_rate": 0.643,
+        "wilson95": [
+          0.6128087342717188,
+          0.6720967727325735
+        ]
+      },
+      "mccfr_external_v1_vs_probability_seat_0": {
+        "wins": 750,
+        "matches": 1000,
+        "win_rate": 0.75,
+        "wilson95": [
+          0.7222391934441553,
+          0.7758473572626495
+        ]
+      },
+      "mccfr_external_v1_vs_probability_seat_1": {
+        "wins": 715,
+        "matches": 1000,
+        "win_rate": 0.715,
+        "wilson95": [
+          0.686239728877674,
+          0.7421147047301779
+        ]
+      },
+      "mccfr_external_v1_vs_aggressive_seat_0": {
+        "wins": 995,
+        "matches": 1000,
+        "win_rate": 0.995,
+        "wilson95": [
+          0.9883488743952387,
+          0.9978624960042348
+        ]
+      },
+      "mccfr_external_v1_vs_aggressive_seat_1": {
+        "wins": 993,
+        "matches": 1000,
+        "win_rate": 0.993,
+        "wilson95": [
+          0.9856215030730511,
+          0.996605174920768
+        ]
+      },
+      "mccfr_external_v1_vs_conservative_seat_0": {
+        "wins": 750,
+        "matches": 1000,
+        "win_rate": 0.75,
+        "wilson95": [
+          0.7222391934441553,
+          0.7758473572626495
+        ]
+      },
+      "mccfr_external_v1_vs_conservative_seat_1": {
+        "wins": 715,
+        "matches": 1000,
+        "win_rate": 0.715,
+        "wilson95": [
+          0.686239728877674,
+          0.7421147047301779
+        ]
+      },
+      "mccfr_external_v1_vs_truthful_seat_0": {
+        "wins": 637,
+        "matches": 1000,
+        "win_rate": 0.637,
+        "wilson95": [
+          0.606723866851864,
+          0.666227562935465
+        ]
+      },
+      "mccfr_external_v1_vs_truthful_seat_1": {
+        "wins": 612,
+        "matches": 1000,
+        "win_rate": 0.612,
+        "wilson95": [
+          0.5814233569164107,
+          0.6417194178002379
+        ]
+      },
+      "mccfr_external_v1_vs_adaptive_seat_0": {
+        "wins": 667,
+        "matches": 1000,
+        "win_rate": 0.667,
+        "wilson95": [
+          0.6371992085584995,
+          0.6955226073136461
+        ]
+      },
+      "mccfr_external_v1_vs_adaptive_seat_1": {
+        "wins": 670,
+        "matches": 1000,
+        "win_rate": 0.67,
+        "wilson95": [
+          0.6402538859604785,
+          0.6984449685201488
+        ]
+      }
+    },
+    "decision_count": 365670,
+    "policy_hits": {
+      "adaptive": 22672,
+      "aggressive": 0,
+      "cfr": 24927,
+      "cfr2": 30179,
+      "conservative": 0,
+      "mccfr_external_v1": 159654,
+      "probability": 0,
+      "truthful": 0
+    },
+    "mccfr_metrics": {
+      "opponents": {
+        "adaptive": {
+          "paired_seed_cluster95": [
+            0.6489532660731464,
+            0.6880467339268536
+          ]
+        },
+        "aggressive": {
+          "paired_seed_cluster95": [
+            0.9906239223497821,
+            0.9973760776502179
+          ]
+        },
+        "cfr": {
+          "paired_seed_cluster95": [
+            0.6334358271680233,
+            0.6735641728319767
+          ]
+        },
+        "cfr2": {
+          "paired_seed_cluster95": [
+            0.5149334063468577,
+            0.5540665936531423
+          ]
+        },
+        "conservative": {
+          "paired_seed_cluster95": [
+            0.7136201493978698,
+            0.7513798506021303
+          ]
+        },
+        "probability": {
+          "paired_seed_cluster95": [
+            0.7136201493978698,
+            0.7513798506021303
+          ]
+        },
+        "truthful": {
+          "paired_seed_cluster95": [
+            0.6013596171830086,
+            0.6476403828169915
+          ]
+        }
+      }
+    },
+    "provenance": {
+      "seed_offset": 8500000,
+      "engine_sha256": "749ef6cd3e5200227717b44e52afae85f4e68337eaf863ffd50ae86414856925",
+      "policy_sha256": null,
+      "policy_sha256_by_file": {
+        "policies/fixed5_cfr.json": "9054a212e2865189ee9358e344e3fba48298408edb96fbf8cc343e75d005b977",
+        "policies/fixed5_cfr_v2.json": "d99c9c002989c65fed62348b8ea623974436b7ebc75f9a0821c6e5edee99d9a8",
+        "policies/mccfr_external_v1.bin": "6d184abbb39cd577d5cdd7668888fe419b485383e87ce88364743ecf6bb0522c"
+      }
+    }
+  },
+  {
+    "status": "completed",
+    "run_id": "mccfr_final_20261112",
+    "n": 5,
+    "completed_matches": 2800,
+    "results": {
+      "mccfr_external_v1_vs_cfr2_seat_0": {
+        "wins": 105,
+        "matches": 200,
+        "win_rate": 0.525,
+        "wilson95": [
+          0.45597270710507,
+          0.5930849925990139
+        ]
+      },
+      "mccfr_external_v1_vs_cfr2_seat_1": {
+        "wins": 103,
+        "matches": 200,
+        "win_rate": 0.515,
+        "wilson95": [
+          0.44610724474630287,
+          0.5833273750761476
+        ]
+      },
+      "mccfr_external_v1_vs_cfr_seat_0": {
+        "wins": 125,
+        "matches": 200,
+        "win_rate": 0.625,
+        "wilson95": [
+          0.5561417515728713,
+          0.6891467469475485
+        ]
+      },
+      "mccfr_external_v1_vs_cfr_seat_1": {
+        "wins": 131,
+        "matches": 200,
+        "win_rate": 0.655,
+        "wilson95": [
+          0.5867546071792236,
+          0.7174031309860971
+        ]
+      },
+      "mccfr_external_v1_vs_probability_seat_0": {
+        "wins": 149,
+        "matches": 200,
+        "win_rate": 0.745,
+        "wilson95": [
+          0.6803694869280502,
+          0.8003959701719726
+        ]
+      },
+      "mccfr_external_v1_vs_probability_seat_1": {
+        "wins": 141,
+        "matches": 200,
+        "win_rate": 0.705,
+        "wilson95": [
+          0.6384115802925058,
+          0.7638615572809827
+        ]
+      },
+      "mccfr_external_v1_vs_aggressive_seat_0": {
+        "wins": 200,
+        "matches": 200,
+        "win_rate": 1.0,
+        "wilson95": [
+          0.9811539940816791,
+          1.0
+        ]
+      },
+      "mccfr_external_v1_vs_aggressive_seat_1": {
+        "wins": 199,
+        "matches": 200,
+        "win_rate": 0.995,
+        "wilson95": [
+          0.9722256001302286,
+          0.999116854010634
+        ]
+      },
+      "mccfr_external_v1_vs_conservative_seat_0": {
+        "wins": 149,
+        "matches": 200,
+        "win_rate": 0.745,
+        "wilson95": [
+          0.6803694869280502,
+          0.8003959701719726
+        ]
+      },
+      "mccfr_external_v1_vs_conservative_seat_1": {
+        "wins": 141,
+        "matches": 200,
+        "win_rate": 0.705,
+        "wilson95": [
+          0.6384115802925058,
+          0.7638615572809827
+        ]
+      },
+      "mccfr_external_v1_vs_truthful_seat_0": {
+        "wins": 128,
+        "matches": 200,
+        "win_rate": 0.64,
+        "wilson95": [
+          0.5714139956562682,
+          0.7033091226866021
+        ]
+      },
+      "mccfr_external_v1_vs_truthful_seat_1": {
+        "wins": 125,
+        "matches": 200,
+        "win_rate": 0.625,
+        "wilson95": [
+          0.5561417515728713,
+          0.6891467469475485
+        ]
+      },
+      "mccfr_external_v1_vs_adaptive_seat_0": {
+        "wins": 130,
+        "matches": 200,
+        "win_rate": 0.65,
+        "wilson95": [
+          0.5816333576186576,
+          0.712712840605846
+        ]
+      },
+      "mccfr_external_v1_vs_adaptive_seat_1": {
+        "wins": 141,
+        "matches": 200,
+        "win_rate": 0.705,
+        "wilson95": [
+          0.6384115802925058,
+          0.7638615572809827
+        ]
+      }
+    },
+    "decision_count": 73191,
+    "policy_hits": {
+      "adaptive": 4567,
+      "aggressive": 0,
+      "cfr": 5051,
+      "cfr2": 5981,
+      "conservative": 0,
+      "mccfr_external_v1": 31912,
+      "probability": 0,
+      "truthful": 0
+    },
+    "mccfr_metrics": {
+      "opponents": {
+        "adaptive": {
+          "paired_seed_cluster95": [
+            0.6347333907782998,
+            0.7202666092217002
+          ]
+        },
+        "aggressive": {
+          "paired_seed_cluster95": [
+            0.9926,
+            1
+          ]
+        },
+        "cfr": {
+          "paired_seed_cluster95": [
+            0.5938348692573885,
+            0.6861651307426115
+          ]
+        },
+        "cfr2": {
+          "paired_seed_cluster95": [
+            0.4729649248809223,
+            0.5670350751190778
+          ]
+        },
+        "conservative": {
+          "paired_seed_cluster95": [
+            0.6812006057727579,
+            0.7687993942272421
+          ]
+        },
+        "probability": {
+          "paired_seed_cluster95": [
+            0.6812006057727579,
+            0.7687993942272421
+          ]
+        },
+        "truthful": {
+          "paired_seed_cluster95": [
+            0.5798318004272867,
+            0.6851681995727132
+          ]
+        }
+      }
+    },
+    "provenance": {
+      "seed_offset": 8400000,
+      "engine_sha256": "749ef6cd3e5200227717b44e52afae85f4e68337eaf863ffd50ae86414856925",
+      "policy_sha256": null,
+      "policy_sha256_by_file": {
+        "policies/fixed5_cfr.json": "9054a212e2865189ee9358e344e3fba48298408edb96fbf8cc343e75d005b977",
+        "policies/fixed5_cfr_v2.json": "d99c9c002989c65fed62348b8ea623974436b7ebc75f9a0821c6e5edee99d9a8",
+        "policies/mccfr_external_v1.bin": "6d184abbb39cd577d5cdd7668888fe419b485383e87ce88364743ecf6bb0522c"
+      }
+    }
+  },
+  {
+    "status": "completed",
+    "run_id": "mccfr_screen_100k_repro_20261112",
+    "n": 5,
+    "completed_matches": 200,
+    "results": {
+      "mccfr_external_v1_vs_cfr2_seat_0": {
+        "wins": 13,
+        "matches": 50,
+        "win_rate": 0.26,
+        "wilson95": [
+          0.15871379651367384,
+          0.3955342198899992
+        ]
+      },
+      "mccfr_external_v1_vs_cfr2_seat_1": {
+        "wins": 19,
+        "matches": 50,
+        "win_rate": 0.38,
+        "wilson95": [
+          0.2586259584257722,
+          0.5184980497760643
+        ]
+      },
+      "mccfr_external_v1_vs_probability_seat_0": {
+        "wins": 32,
+        "matches": 50,
+        "win_rate": 0.64,
+        "wilson95": [
+          0.5014076201030195,
+          0.7586143703281711
+        ]
+      },
+      "mccfr_external_v1_vs_probability_seat_1": {
+        "wins": 32,
+        "matches": 50,
+        "win_rate": 0.64,
+        "wilson95": [
+          0.5014076201030195,
+          0.7586143703281711
+        ]
+      }
+    },
+    "decision_count": 5721,
+    "policy_hits": {
+      "cfr2": 1492,
+      "mccfr_external_v1": 2696,
+      "probability": 0
+    },
+    "provenance": {
+      "seed_offset": 8200000,
+      "engine_sha256": "749ef6cd3e5200227717b44e52afae85f4e68337eaf863ffd50ae86414856925",
+      "policy_sha256": null,
+      "policy_sha256_by_file": {
+        "policies/fixed5_cfr_v2.json": "d99c9c002989c65fed62348b8ea623974436b7ebc75f9a0821c6e5edee99d9a8",
+        "policies/mccfr_external_v1.bin": "666faeead9700577ac49c56dfd8135425e448674058592e7de0f3a3ad8576a23"
+      }
+    }
+  },
+  {
+    "status": "completed",
+    "run_id": "mccfr_screen_10k_20261112",
+    "n": 5,
+    "completed_matches": 200,
+    "results": {
+      "mccfr_external_v1_vs_cfr2_seat_0": {
+        "wins": 7,
+        "matches": 50,
+        "win_rate": 0.14,
+        "wilson95": [
+          0.06950745262022862,
+          0.2618645719852809
+        ]
+      },
+      "mccfr_external_v1_vs_cfr2_seat_1": {
+        "wins": 5,
+        "matches": 50,
+        "win_rate": 0.1,
+        "wilson95": [
+          0.04347512399157111,
+          0.2136049033478839
+        ]
+      },
+      "mccfr_external_v1_vs_probability_seat_0": {
+        "wins": 22,
+        "matches": 50,
+        "win_rate": 0.44,
+        "wilson95": [
+          0.3116198721023534,
+          0.5769421319985648
+        ]
+      },
+      "mccfr_external_v1_vs_probability_seat_1": {
+        "wins": 15,
+        "matches": 50,
+        "win_rate": 0.3,
+        "wilson95": [
+          0.1910338908960936,
+          0.4375061227736339
+        ]
+      }
+    },
+    "decision_count": 5444,
+    "policy_hits": {
+      "cfr2": 1361,
+      "mccfr_external_v1": 2419,
+      "probability": 0
+    },
+    "provenance": {
+      "seed_offset": 8200000,
+      "engine_sha256": "749ef6cd3e5200227717b44e52afae85f4e68337eaf863ffd50ae86414856925",
+      "policy_sha256": null,
+      "policy_sha256_by_file": {
+        "policies/fixed5_cfr_v2.json": "d99c9c002989c65fed62348b8ea623974436b7ebc75f9a0821c6e5edee99d9a8",
+        "policies/mccfr_external_v1.bin": "a2aaa1d7057a22daec33b195a02a810fe5b726ee91432152f579f1011d94aced"
+      }
+    }
+  },
+  {
+    "status": "completed",
+    "run_id": "mccfr_screen_1m_20261112",
+    "n": 5,
+    "completed_matches": 200,
+    "results": {
+      "mccfr_external_v1_vs_cfr2_seat_0": {
+        "wins": 25,
+        "matches": 50,
+        "win_rate": 0.5,
+        "wilson95": [
+          0.36644286412332855,
+          0.6335571358766714
+        ]
+      },
+      "mccfr_external_v1_vs_cfr2_seat_1": {
+        "wins": 27,
+        "matches": 50,
+        "win_rate": 0.54,
+        "wilson95": [
+          0.40398634328388083,
+          0.6703056539821737
+        ]
+      },
+      "mccfr_external_v1_vs_probability_seat_0": {
+        "wins": 34,
+        "matches": 50,
+        "win_rate": 0.68,
+        "wilson95": [
+          0.5418944286372394,
+          0.792419559060006
+        ]
+      },
+      "mccfr_external_v1_vs_probability_seat_1": {
+        "wins": 36,
+        "matches": 50,
+        "win_rate": 0.72,
+        "wilson95": [
+          0.5833461285401034,
+          0.8252598564231963
+        ]
+      }
+    },
+    "decision_count": 5819,
+    "policy_hits": {
+      "cfr2": 1537,
+      "mccfr_external_v1": 2765,
+      "probability": 0
+    },
+    "provenance": {
+      "seed_offset": 8200000,
+      "engine_sha256": "749ef6cd3e5200227717b44e52afae85f4e68337eaf863ffd50ae86414856925",
+      "policy_sha256": null,
+      "policy_sha256_by_file": {
+        "policies/fixed5_cfr_v2.json": "d99c9c002989c65fed62348b8ea623974436b7ebc75f9a0821c6e5edee99d9a8",
+        "policies/mccfr_external_v1.bin": "6d184abbb39cd577d5cdd7668888fe419b485383e87ce88364743ecf6bb0522c"
+      }
+    }
+  },
+  {
+    "status": "completed",
+    "run_id": "mccfr_screen_500k_20261112",
+    "n": 5,
+    "completed_matches": 200,
+    "results": {
+      "mccfr_external_v1_vs_cfr2_seat_0": {
+        "wins": 26,
+        "matches": 50,
+        "win_rate": 0.52,
+        "wilson95": [
+          0.3851151225880844,
+          0.6520308760449429
+        ]
+      },
+      "mccfr_external_v1_vs_cfr2_seat_1": {
+        "wins": 28,
+        "matches": 50,
+        "win_rate": 0.56,
+        "wilson95": [
+          0.4230578680014353,
+          0.6883801278976466
+        ]
+      },
+      "mccfr_external_v1_vs_probability_seat_0": {
+        "wins": 33,
+        "matches": 50,
+        "win_rate": 0.66,
+        "wilson95": [
+          0.5215356854148285,
+          0.7756323036493895
+        ]
+      },
+      "mccfr_external_v1_vs_probability_seat_1": {
+        "wins": 34,
+        "matches": 50,
+        "win_rate": 0.68,
+        "wilson95": [
+          0.5418944286372394,
+          0.792419559060006
+        ]
+      }
+    },
+    "decision_count": 5844,
+    "policy_hits": {
+      "cfr2": 1536,
+      "mccfr_external_v1": 2775,
+      "probability": 0
+    },
+    "provenance": {
+      "seed_offset": 8200000,
+      "engine_sha256": "749ef6cd3e5200227717b44e52afae85f4e68337eaf863ffd50ae86414856925",
+      "policy_sha256": null,
+      "policy_sha256_by_file": {
+        "policies/fixed5_cfr_v2.json": "d99c9c002989c65fed62348b8ea623974436b7ebc75f9a0821c6e5edee99d9a8",
+        "policies/mccfr_external_v1.bin": "9d48b1adb87f089c36eb07bc2e3b6f5fda2ded426cd7c4b969d74fdb971f0e5e"
+      }
+    }
+  },
+  {
+    "status": "completed",
+    "run_id": "mccfr_validation_20261112",
+    "n": 5,
+    "completed_matches": 700,
+    "results": {
+      "mccfr_external_v1_vs_cfr2_seat_0": {
+        "wins": 30,
+        "matches": 50,
+        "win_rate": 0.6,
+        "wilson95": [
+          0.4618118910275937,
+          0.7239181021375425
+        ]
+      },
+      "mccfr_external_v1_vs_cfr2_seat_1": {
+        "wins": 26,
+        "matches": 50,
+        "win_rate": 0.52,
+        "wilson95": [
+          0.3851151225880844,
+          0.6520308760449429
+        ]
+      },
+      "mccfr_external_v1_vs_cfr_seat_0": {
+        "wins": 39,
+        "matches": 50,
+        "win_rate": 0.78,
+        "wilson95": [
+          0.6475818431054045,
+          0.8724621377569771
+        ]
+      },
+      "mccfr_external_v1_vs_cfr_seat_1": {
+        "wins": 27,
+        "matches": 50,
+        "win_rate": 0.54,
+        "wilson95": [
+          0.40398634328388083,
+          0.6703056539821737
+        ]
+      },
+      "mccfr_external_v1_vs_probability_seat_0": {
+        "wins": 41,
+        "matches": 50,
+        "win_rate": 0.82,
+        "wilson95": [
+          0.6920368054529739,
+          0.902299172675462
+        ]
+      },
+      "mccfr_external_v1_vs_probability_seat_1": {
+        "wins": 36,
+        "matches": 50,
+        "win_rate": 0.72,
+        "wilson95": [
+          0.5833461285401034,
+          0.8252598564231963
+        ]
+      },
+      "mccfr_external_v1_vs_aggressive_seat_0": {
+        "wins": 50,
+        "matches": 50,
+        "win_rate": 1.0,
+        "wilson95": [
+          0.9286499658256813,
+          1.0
+        ]
+      },
+      "mccfr_external_v1_vs_aggressive_seat_1": {
+        "wins": 49,
+        "matches": 50,
+        "win_rate": 0.98,
+        "wilson95": [
+          0.8950431352816304,
+          0.9964608319110235
+        ]
+      },
+      "mccfr_external_v1_vs_conservative_seat_0": {
+        "wins": 41,
+        "matches": 50,
+        "win_rate": 0.82,
+        "wilson95": [
+          0.6920368054529739,
+          0.902299172675462
+        ]
+      },
+      "mccfr_external_v1_vs_conservative_seat_1": {
+        "wins": 36,
+        "matches": 50,
+        "win_rate": 0.72,
+        "wilson95": [
+          0.5833461285401034,
+          0.8252598564231963
+        ]
+      },
+      "mccfr_external_v1_vs_truthful_seat_0": {
+        "wins": 38,
+        "matches": 50,
+        "win_rate": 0.76,
+        "wilson95": [
+          0.6258705062480763,
+          0.8570274759812779
+        ]
+      },
+      "mccfr_external_v1_vs_truthful_seat_1": {
+        "wins": 33,
+        "matches": 50,
+        "win_rate": 0.66,
+        "wilson95": [
+          0.5215356854148285,
+          0.7756323036493895
+        ]
+      },
+      "mccfr_external_v1_vs_adaptive_seat_0": {
+        "wins": 34,
+        "matches": 50,
+        "win_rate": 0.68,
+        "wilson95": [
+          0.5418944286372394,
+          0.792419559060006
+        ]
+      },
+      "mccfr_external_v1_vs_adaptive_seat_1": {
+        "wins": 33,
+        "matches": 50,
+        "win_rate": 0.66,
+        "wilson95": [
+          0.5215356854148285,
+          0.7756323036493895
+        ]
+      }
+    },
+    "decision_count": 18219,
+    "policy_hits": {
+      "adaptive": 1128,
+      "aggressive": 0,
+      "cfr": 1262,
+      "cfr2": 1519,
+      "conservative": 0,
+      "mccfr_external_v1": 7924,
+      "probability": 0,
+      "truthful": 0
+    },
+    "mccfr_metrics": {
+      "opponents": {}
+    },
+    "provenance": {
+      "seed_offset": 8300000,
+      "engine_sha256": "749ef6cd3e5200227717b44e52afae85f4e68337eaf863ffd50ae86414856925",
+      "policy_sha256": null,
+      "policy_sha256_by_file": {
+        "policies/fixed5_cfr.json": "9054a212e2865189ee9358e344e3fba48298408edb96fbf8cc343e75d005b977",
+        "policies/fixed5_cfr_v2.json": "d99c9c002989c65fed62348b8ea623974436b7ebc75f9a0821c6e5edee99d9a8",
+        "policies/mccfr_external_v1.bin": "6d184abbb39cd577d5cdd7668888fe419b485383e87ce88364743ecf6bb0522c"
+      }
+    }
   }
 ]

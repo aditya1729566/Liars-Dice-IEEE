@@ -164,6 +164,7 @@ class Handler(BaseHTTPRequestHandler):
                 if manifest_data.get("status") == "completed" and manifest_data.get("ruleset") == RULESET:
                     item = json.loads(path.read_text())
                     if "results" in item:
+                        item = {**runs_by_id.get(item["run_id"], {}), **item}
                         item["provenance"] = {"seed_offset": manifest_data.get("seed_offset"), "engine_sha256": manifest_data.get("engine_sha256"), "policy_sha256": manifest_data.get("policy_sha256"), "policy_sha256_by_file": manifest_data.get("policy_sha256_by_file", {})}
                         if item.get("run_id") in {"fixed5_five_agent_holdout_200", "fixed5_hard_holdout_200"}:
                             item["warning"] = "Historical adaptive rows are excluded from promotion after a seat-symmetry bug; CFR pairings remain valid."

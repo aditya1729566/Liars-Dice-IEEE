@@ -28,7 +28,7 @@ def percentile(values, p):
 
 def analyze(folder):
     connection = sqlite3.connect(folder / 'evaluation.sqlite3')
-    matches = connection.execute('SELECT id,agent_a,agent_b,winner,rounds,actions FROM matches').fetchall()
+    matches = connection.execute('SELECT id,agent_a,agent_b,seed,winner,rounds,actions FROM matches').fetchall()
     rounds = defaultdict(dict)
     for match_id, round_index, raw in connection.execute('SELECT match_id,round_index,reveal_json FROM rounds'):
         rounds[match_id][round_index] = json.loads(raw)
@@ -40,13 +40,15 @@ def analyze(folder):
     by_pair = defaultdict(lambda: {'matches': 0, 'wins': 0, 'rounds': [], 'actions': [],
                                    'mccfr': {'bids': 0, 'false_bids': 0, 'calls': 0, 'correct_calls': 0, 'decisions': 0, 'policy_hits': 0, 'latency_ms': []},
                                    'opponent': {'bids': 0, 'false_bids': 0, 'calls': 0, 'correct_calls': 0, 'decisions': 0, 'policy_hits': 0, 'latency_ms': []}})
-    for match_id, agent_a, agent_b, winner, count_rounds, actions in matches:
+    for match_id, agent_a, agent_b, seed, winner, count_rounds, actions in matches:
         if 'mccfr_external_v1' not in (agent_a, agent_b):
             continue
         opponent = agent_b if agent_a == 'mccfr_external_v1' else agent_a
         row = by_pair[opponent]
         row['matches'] += 1
-        row['wins'] += (agent_a if winner == 'HUMAN' else agent_b) == 'mccfr_external_v1'
+        won = (agent_a if winner == 'HUMAN' else agent_b) == 'mccfr_external_v1'
+        row['wins'] += won
+        row.setdefault('seed_outcomes', defaultdict(list))[seed].append(int(won))
         row['rounds'].append(count_rounds)
         row['actions'].append(actions)
         for round_index, player, agent, action, latency, hit in decisions[match_id]:
@@ -68,6 +70,12 @@ def analyze(folder):
                   'win_rate': row['wins'] / row['matches'], 'wilson95': wilson(row['wins'], row['matches']),
                   'average_match_rounds': statistics.mean(row['rounds']),
                   'average_match_actions': statistics.mean(row['actions'])}
+        seed_outcomes = row['seed_outcomes']
+        if len(seed_outcomes) > 1 and all(len(outcomes) == 2 for outcomes in seed_outcomes.values()):
+            paired_rates = [sum(outcomes) / 2 for outcomes in seed_outcomes.values()]
+            standard_error = math.sqrt(statistics.variance(paired_rates) / len(paired_rates))
+            result['paired_seed_cluster95'] = [max(0, result['win_rate'] - 1.96 * standard_error),
+                                               min(1, result['win_rate'] + 1.96 * standard_error)]
         for side_name in ('mccfr', 'opponent'):
             side = row[side_name]
             result[side_name] = {key: side[key] for key in ('decisions', 'policy_hits', 'bids', 'false_bids', 'calls', 'correct_calls')}

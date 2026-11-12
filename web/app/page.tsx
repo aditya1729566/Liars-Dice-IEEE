@@ -11,10 +11,10 @@ type Event = { type: string; round?: number; player?: string; q?: number; f?: nu
 type Game = { id: string; duration_seconds: number; scores: number[]; round: number; phase: 'BIDDING' | 'ROUND_OVER' | 'MATCH_OVER'; status: 'ACTIVE' | 'COMPLETED'; turn: string; bid: Bid | null; winner: string | null; version: number; agent: string; hand: number[]; ai_hand: number[] | null; events: Event[]; legal_actions: Action[] };
 type Decision = { round: number; sequence: number; scores: number[]; hand: number[]; current_bid: Bid | null; current_bid_truth_prior: number | null; action: Action; action_truth_prior: number | null; source: string; policy_probability: number | null; policy_options?: { action: string; weight: number }[]; policy_key: string | null; policy_id: string };
 type MatchReport = { id: string; agent: string; winner: string; scores: number[]; rounds: number; decisions: Decision[]; reveals: Event[]; replay: ReplayFrame[]; method: string };
-type ResearchRun = { run_id: string; completed_matches: number; warning?: string; provenance?: { seed_offset?: number; engine_sha256?: string; policy_sha256?: string; policy_sha256_by_file?: Record<string, string> }; results: Record<string, { wins: number; matches: number; win_rate: number; wilson95: number[] }> };
+type ResearchRun = { run_id: string; completed_matches: number; warning?: string; provenance?: { seed_offset?: number; engine_sha256?: string; policy_sha256?: string; policy_sha256_by_file?: Record<string, string> }; results: Record<string, { wins: number; matches: number; win_rate: number; wilson95: number[] }>; mccfr_metrics?: { opponents: Record<string, { paired_seed_cluster95?: number[] }> } };
 type Analysis = { naive_prior_from_ai_hand: number };
 const agents = [
-  { id: 'cfr2', name: 'The Apprentice', detail: 'Wider trained strategy · measured champion' },
+  { id: 'cfr2', name: 'The Apprentice', detail: 'Wider trained strategy · current default' },
   { id: 'mccfr_external_v1', name: 'The Monte Carlo', detail: 'External-Sampling MCCFR · explores sampled scenarios to minimize regret' },
   { id: 'probability', name: 'The Calculator', detail: 'Exact odds for five unseen dice' },
   { id: 'adaptive', name: 'The Observer', detail: 'Public outcomes · experimental' },
@@ -36,9 +36,13 @@ function BenchmarkComparison({ runs }: { runs: ResearchRun[] }) {
   const denominator = 1 + z * z / matches;
   const center = (p + z * z / (2 * matches)) / denominator;
   const radius = z * Math.sqrt(p * (1 - p) / matches + z * z / (4 * matches * matches)) / denominator;
+  const paired = final.mccfr_metrics?.opponents.cfr2?.paired_seed_cluster95;
+  const interval = paired || [center - radius, center + radius];
+  const intervalLabel = paired ? '95% paired-seed interval' : '95% Wilson interval';
+  const precisePct = (value: number) => `${(100 * value).toFixed(2)}%`;
   return <div className="evidence-run" aria-label="Measured MCCFR versus Apprentice comparison">
     <div className="evidence-run-head"><strong>Monte Carlo vs Apprentice</strong><span>final holdout</span></div>
-    <p>{wins} wins in {matches} paired-seed, seat-balanced matches ({pct(p)}; 95% Wilson interval {pct(center - radius)}–{pct(center + radius)}). Both policies use one-round abstractions.</p>
+    <p>{wins} wins in {matches} paired-seed, seat-balanced matches ({precisePct(p)}; {intervalLabel} {precisePct(interval[0])}–{precisePct(interval[1])}). Both policies use one-round abstractions.</p>
   </div>;
 }
 async function request<T>(path: string, options?: RequestInit): Promise<T> {

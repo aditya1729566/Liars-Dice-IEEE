@@ -29,7 +29,7 @@ The exported JSON policy is packed as sorted, fixed-size records in `policies/mc
 
 The independent one-die toy game has all legal opening bids, quantity-two raises, complete public history, and an exact information-respecting best-response evaluator. With seed 42, measured exploitability was 0.083339 after 1,000 iterations and 0.008306 after 10,000. This verifies convergence on that toy; it is **not** an exploitability measure for the five-dice model. The toy test also checks policy normalization. The trainer self-test covers regret matching, action sampling, fair-die sampling, legal abstract moves, hidden-hand independence, and challenge utilities. A resume test compares policy and checkpoint bytes against an uninterrupted run.
 
-Engine and API tests cover full matches, action legality, replay validity, policy checksums, redacted active views, hidden-hand independence, model availability, and corrupt-file fallback. A local browser playthrough against The Monte Carlo completed 0–5 in five rounds, then displayed a 25-step replay with recorded MCCFR policy weight and both post-match hands. A 390-pixel mobile viewport had no horizontal overflow. Screenshots: [desktop replay](screenshots/mccfr-replay-20261112.jpg) and [mobile replay](screenshots/mccfr-replay-mobile-20261112.jpg).
+Engine and API tests cover full matches, action legality, replay validity, policy checksums, redacted active views, hidden-hand independence, model availability, and corrupt-file fallback. Decompressing the tracked checkpoint into a fresh temporary directory and exporting it recreated the selected JSON policy byte for byte. A local browser playthrough against The Monte Carlo completed 0–5 in five rounds, then displayed a 25-step replay with recorded MCCFR policy weight and both post-match hands. The same match and Research view loaded in the production kiosk build. A 390-pixel mobile viewport had no horizontal overflow. Screenshots: [desktop replay](screenshots/mccfr-replay-20261112.jpg) and [mobile replay](screenshots/mccfr-replay-mobile-20261112.jpg).
 
 ## Training checkpoints
 
@@ -42,7 +42,7 @@ The training seed was 20261112 and one CPU worker was used. Each iteration conta
 | 500,000 | 1,000,000 | 37,421,808 | 351,327 | 17.671 s from 100k |
 | 1,000,000 | 2,000,000 | 72,751,079 | 361,343 | 21.038 s from 500k |
 
-The four segment times sum to about 45.39 s, excluding process startup between resumes. A separate one-process rerun with the same seed and milestones completed in 60.979 s while the final tournament also used the machine. Its measured peak RSS was 676,544,512 bytes (645 MiB). The final checkpoint and JSON policy were byte-identical to the staged run: checkpoint SHA-256 `6c36ab4e1b844e2da8db20b4dac60e8924591d9cf1916bf5078f8df99b3c6686`, JSON policy SHA-256 `4abee0311f2c418b5810668794ba900576c6ecf19b3fed2d3c4fced2c8a4396e`. The compressed, tracked checkpoint is `policies/mccfr_external_v1.checkpoint.json.gz` (SHA-256 `88cc97410e21f5c791bc4fdde85e9f3142ba154ca6073bf7367d46f9a0936c9e`). The 1m average policy has 277,980 nonempty information sets. Its packed artifact is 18,902,656 bytes, SHA-256 `6d184abbb39cd577d5cdd7668888fe419b485383e87ce88364743ecf6bb0522c`. The original CFR and Apprentice SHA-256 values remain `9054a212e2865189ee9358e344e3fba48298408edb96fbf8cc343e75d005b977` and `d99c9c002989c65fed62348b8ea623974436b7ebc75f9a0821c6e5edee99d9a8`.
+The four segment times sum to about 45.39 s, excluding process startup between resumes. A separate one-process rerun with the same seed and milestones completed in 60.979 s while the final tournament also used the machine. Its measured peak RSS was 676,544,512 bytes (645 MiB). A further one-process run from committed source `f740fce78a5e17830651f04f09805516fd2ffdbe` completed in 55.624 s with 581,255,168 bytes peak RSS, while the larger confirmation tournament was running. Its [manifest](../evidence/mccfr-committed-run-20261112.json) records the command, commit, seed, iterations, terminal histories, memory, and elapsed time. All three final checkpoints and JSON policies were byte-identical: checkpoint SHA-256 `6c36ab4e1b844e2da8db20b4dac60e8924591d9cf1916bf5078f8df99b3c6686`, JSON policy SHA-256 `4abee0311f2c418b5810668794ba900576c6ecf19b3fed2d3c4fced2c8a4396e`. The compressed, tracked checkpoint is `policies/mccfr_external_v1.checkpoint.json.gz` (SHA-256 `88cc97410e21f5c791bc4fdde85e9f3142ba154ca6073bf7367d46f9a0936c9e`). The 1m average policy has 277,980 nonempty information sets. Its packed artifact is 18,902,656 bytes, SHA-256 `6d184abbb39cd577d5cdd7668888fe419b485383e87ce88364743ecf6bb0522c`. The original CFR and Apprentice SHA-256 values remain `9054a212e2865189ee9358e344e3fba48298408edb96fbf8cc343e75d005b977` and `d99c9c002989c65fed62348b8ea623974436b7ebc75f9a0821c6e5edee99d9a8`.
 
 ## Checkpoint screening and selection
 
@@ -61,21 +61,37 @@ Validation used independent paired seeds 8,300,000–8,300,049, 50 matches per s
 
 ## Final held-out benchmark
 
-The frozen 1m policy was evaluated on new paired seeds 8,400,000–8,400,199, 200 matches per seat against each opponent: 2,800 completed matches and 73,191 recorded decisions. Counts below are Monte Carlo wins over 400 matches per opponent; Wilson intervals are descriptive 95% binomial intervals.
+The frozen 1m policy was evaluated on new paired seeds 8,400,000–8,400,199, 200 matches per seat against each opponent: 2,800 completed matches and 73,191 recorded decisions. Counts below are Monte Carlo wins over 400 matches per opponent. Intervals use the sample variance of each seed's two-seat mean and a 1.96 normal multiplier; they are descriptive approximations that keep the paired seats together.
 
-| Opponent | Wins / matches | Win % (95% Wilson) | Avg rounds | MCCFR bluff % | MCCFR challenge % | Challenge accuracy % | MCCFR p95 decision ms |
+| Opponent | Wins / matches | Win % (95% paired-seed interval) | Avg rounds | MCCFR bluff % | MCCFR challenge % | Challenge accuracy % | MCCFR p95 decision ms |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Apprentice (`cfr2`) | 208 / 400 | 52.0 (47.1–56.9) | 7.63 | 29.9 | 25.6 | 63.4 | 4.37 |
-| Original CFR | 256 / 400 | 64.0 (59.2–68.6) | 7.43 | 27.0 | 20.2 | 61.0 | 3.54 |
-| Calculator | 290 / 400 | 72.5 (67.9–76.6) | 7.39 | 23.9 | 11.4 | 34.9 | 3.29 |
-| Bluffer | 399 / 400 | 99.8 (98.6–100) | 6.16 | 16.0 | 76.6 | 81.3 | 3.08 |
-| Conservative | 290 / 400 | 72.5 (67.9–76.6) | 7.39 | 23.9 | 11.4 | 34.9 | 3.64 |
-| Truthful | 253 / 400 | 63.2 (58.4–67.8) | 7.71 | 25.8 | 13.4 | 3.0 | 3.41 |
-| Observer (`adaptive`) | 271 / 400 | 67.8 (63.0–72.1) | 7.44 | 26.6 | 19.5 | 61.1 | 4.22 |
+| Apprentice (`cfr2`) | 208 / 400 | 52.0 (47.3–56.7) | 7.63 | 29.9 | 25.6 | 63.4 | 4.37 |
+| Original CFR | 256 / 400 | 64.0 (59.4–68.6) | 7.43 | 27.0 | 20.2 | 61.0 | 3.54 |
+| Calculator | 290 / 400 | 72.5 (68.1–76.9) | 7.39 | 23.9 | 11.4 | 34.9 | 3.29 |
+| Bluffer | 399 / 400 | 99.8 (99.3–100) | 6.16 | 16.0 | 76.6 | 81.3 | 3.08 |
+| Conservative | 290 / 400 | 72.5 (68.1–76.9) | 7.39 | 23.9 | 11.4 | 34.9 | 3.64 |
+| Truthful | 253 / 400 | 63.2 (58.0–68.5) | 7.71 | 25.8 | 13.4 | 3.0 | 3.41 |
+| Observer (`adaptive`) | 271 / 400 | 67.8 (63.5–72.0) | 7.44 | 26.6 | 19.5 | 61.1 | 4.22 |
 
-“Bluff” means a bid that the eventual revealed hands show to be false, including intermediate bids. Challenge frequency is calls divided by that agent's decisions, and challenge accuracy is won calls divided by calls. Latency times a fresh C++ engine process and policy lookup, excluding HTTP and storage. Match length in actions, exact counts, per-seat results, opponent metrics, policy-hit counts, engine checksum, and seed provenance are in the SQLite and JSON evidence. Calculator and conservative use thresholds that lead to identical move choices at these discrete priors. The 52% direct result against Apprentice includes 50%; the evidence does not establish that Monte Carlo is stronger than the current champion. The Apprentice remains the default.
+“Bluff” means a bid that the eventual revealed hands show to be false, including intermediate bids. Challenge frequency is calls divided by that agent's decisions, and challenge accuracy is won calls divided by calls. Latency times a fresh C++ engine process and policy lookup, excluding HTTP and storage. Match length in actions, exact counts, per-seat results, opponent metrics, policy-hit counts, engine checksum, and seed provenance are in the SQLite and JSON evidence. Calculator and conservative use thresholds that lead to identical move choices at these discrete priors. The 52% direct interval against Apprentice includes 50%; the evidence does not establish that Monte Carlo is stronger than the current champion. The Apprentice remains the default.
 
 Raw [training checkpoints and policies](../evidence/mccfr-training-20261112.zip) (SHA-256 `28b8dc7c2cdc180e9644fa72f4f3b8548c4c447a6449ebd9ec9c3c0067cbb22d`) and [development, validation, and final evaluations](../evidence/mccfr-evaluation-20261112.zip) (SHA-256 `469d7538c542eb564ccee12d3e1e93cd92d55ebac56911958dec4ab1561bff45`) are tracked. The archives were integrity checked; the evaluation archive contains the per-match SQLite records.
+
+## Larger independent confirmation
+
+The same frozen 1m policy then played 1,000 matches per seat against each of seven opponents using new paired seeds 8,500,000–8,500,999. All 14,000 planned matches completed from 2026-11-12 11:15:04 to 12:00:05 UTC with zero logged errors and 365,670 recorded decisions. The table uses approximate 95% intervals that cluster each seed's two seats, as described above. These synthetic opponents and seeds differ from both screening and the initial final holdout.
+
+| Opponent | Wins / matches | Win % (95% paired-seed interval) | Avg rounds | MCCFR bluff % | MCCFR challenge % | Challenge accuracy % | MCCFR p95 decision ms |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Apprentice (`cfr2`) | 1,069 / 2,000 | 53.45 (51.49–55.41) | 7.64 | 28.8 | 25.5 | 62.4 | 4.34 |
+| Original CFR | 1,307 / 2,000 | 65.35 (63.34–67.36) | 7.43 | 27.1 | 20.3 | 60.0 | 3.94 |
+| Calculator | 1,465 / 2,000 | 73.25 (71.36–75.14) | 7.38 | 24.1 | 11.5 | 35.6 | 3.76 |
+| Bluffer | 1,988 / 2,000 | 99.40 (99.06–99.74) | 6.14 | 14.3 | 76.5 | 81.5 | 3.61 |
+| Conservative | 1,465 / 2,000 | 73.25 (71.36–75.14) | 7.38 | 24.1 | 11.5 | 35.6 | 4.27 |
+| Truthful | 1,249 / 2,000 | 62.45 (60.14–64.76) | 7.71 | 25.9 | 13.7 | 3.1 | 3.51 |
+| Observer (`adaptive`) | 1,337 / 2,000 | 66.85 (64.90–68.80) | 7.44 | 26.8 | 19.4 | 58.7 | 4.33 |
+
+The direct Apprentice interval is above 50% under this seed-paired approximation, supporting a measured advantage against that frozen policy in this evaluation. It does not prove a five-dice equilibrium strategy or predict results against people. Apprentice remains the application default as required. The Calculator and conservative rows again coincide in wins because their thresholds produce the same choices at these priors. Raw per-match actions, reveals, timings, policy hits, and fixed engine and model checksums are in [confirmation evidence](../evidence/mccfr-confirm-20261112.zip) (SHA-256 `582ba801ca7fad661aa6223a65db8efd3e2ad5fe5cdd2bb8e9b40ff94e068350`); the run manifest and per-opponent metrics are inside the integrity-checked archive. The production-kiosk [Research screenshot](screenshots/mccfr-confirm-research-20261112.jpg) shows the published paired interval beside a completed human replay. This confirmation did not change checkpoint selection.
 
 ## Reproduction and limitations
 

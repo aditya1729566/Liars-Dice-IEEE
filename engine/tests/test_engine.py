@@ -95,6 +95,8 @@ class EngineTests(unittest.TestCase):
                     hits[agent]+=bool(out['policy_hit'])
                     s=out['state']
                 self.assertEqual(s['status'],'COMPLETED')
+                if agent=='mccfr_external_v1':
+                    self.assertEqual({d['policy_id'] for d in s['ai_decisions']},{'mccfr_external_v1'})
                 self.assertTrue(call({'op':'replay','state':s})[1]['valid'])
         self.assertGreater(hits['cfr'],0)
         self.assertGreater(hits['adaptive'],0)
