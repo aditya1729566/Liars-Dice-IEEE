@@ -31,6 +31,22 @@
       "training_run": "fixed5_cfr_v2_100k",
       "evaluation_run": "fixed5_cfr_v2_confirm_400",
       "champion": true
+    },
+    {
+      "id": "mccfr_external_v1",
+      "ruleset": "fixed5_score5_quantity_only_v1",
+      "agent_type": "external-sampling MCCFR with sampled opponent-node averaging",
+      "training_objective": "one-round point utility, imperfect-recall action abstraction",
+      "training_iterations": 1000000,
+      "created_utc": "2026-11-12T11:01:28Z",
+      "seed": 20261112,
+      "parent_checkpoint": "policies/mccfr_external_v1.checkpoint.json.gz",
+      "checkpoint_sha256": "88cc97410e21f5c791bc4fdde85e9f3142ba154ca6073bf7367d46f9a0936c9e",
+      "policy_path": "policies/mccfr_external_v1.bin",
+      "policy_sha256": "6d184abbb39cd577d5cdd7668888fe419b485383e87ce88364743ecf6bb0522c",
+      "training_run": "mccfr_fixed5_repro_20261112",
+      "evaluation_run": "pending",
+      "champion": false
     }
   ]
 }

@@ -1,6 +1,8 @@
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstdint>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <random>
@@ -8,6 +10,7 @@
 #include <string>
 #include <vector>
 #include "../vendor/json.hpp"
+#include "mccfr_policy.hpp"
 using json=nlohmann::json;
 using namespace std;
 static constexpr const char* RULESET="fixed5_score5_quantity_only_v1";
@@ -29,6 +32,37 @@ static double truth_prior(int q,int f,const json& hand,int unknown){
   int k=0;for(const auto& d:hand)if(d.get<int>()==f)k++;
   int needed=q-k;if(needed<=0)return 1;if(needed>unknown)return 0;
   double p=0;for(int i=needed;i<=unknown;i++){double comb=1;for(int j=1;j<=i;j++)comb*=double(unknown-j+1)/j;p+=comb*pow(1.0/6,i)*pow(5.0/6,unknown-i);}return min(1.0,p);
+}
+static vector<pair<json,double>> mccfr_lookup(const string& key,const json& legalActions){
+  // Fixed-width records permit one disk seek per binary-search step. The
+  // public API validates the SHA-256 before offering this agent to visitors.
+  std::ifstream file("policies/mccfr_external_v1.bin",ios::binary);
+  if(!file)return {};
+  char magic[8]{};uint64_t count=0;file.read(magic,8);file.read(reinterpret_cast<char*>(&count),8);
+  if(!file||memcmp(magic,"MCCFR1\0",8)!=0||count>2000000)return {};
+  file.seekg(0,ios::end);const auto bytes=file.tellg();
+  if(bytes!=std::streamoff(16+68*count))return {};
+  uint64_t lo=0,hi=count;
+  while(lo<hi){
+    const uint64_t mid=lo+(hi-lo)/2;file.seekg(std::streamoff(16+68*mid));
+    char rowKey[32]{};file.read(rowKey,32);if(!file)return {};
+    if(memchr(rowKey,0,32)==nullptr)return {};
+    int order=key.compare(rowKey);
+    if(order>0)lo=mid+1;else hi=mid;
+  }
+  if(lo==count)return {};
+  file.seekg(std::streamoff(16+68*lo));char rowKey[32]{};uint8_t n=0,ids[7]{};float weights[7]{};
+  file.read(rowKey,32);file.read(reinterpret_cast<char*>(&n),1);file.read(reinterpret_cast<char*>(ids),7);file.read(reinterpret_cast<char*>(weights),28);
+  if(!file||memchr(rowKey,0,32)==nullptr||key!=rowKey||n==0||n>7)return {};
+  vector<pair<json,double>> found;double total=0;
+  for(int i=0;i<n;++i){
+    if(!isfinite(weights[i])||weights[i]<0||ids[i]>60)return {};
+    json action=ids[i]==0?json({{"type","call"}}):json({{"type","bid"},{"q",(ids[i]-1)/6+1},{"f",(ids[i]-1)%6+1}});
+    if(std::find(legalActions.begin(),legalActions.end(),action)==legalActions.end())return {};
+    if(weights[i]>0){found.push_back({action,weights[i]});total+=weights[i];}
+  }
+  if(total<0.999||total>1.001)return {};
+  return found;
 }
 static void roll(json& s){
   s["hands"]=json::array({json::array(),json::array()});
@@ -75,7 +109,7 @@ static json choose(json& s,int player){
   json hand=s["hands"][player];double callP=s["bid"].is_null()?1:truth_prior(s["bid"]["q"],s["bid"]["f"],hand,5);
   auto finish=[&](const json& action,const string& source,const json& policyProbability,const string& policyKey)->json{
     if(player==1){
-      json trace={{"round",s["round"]},{"sequence",s["version"].get<int>()+1},{"scores",s["scores"]},{"hand",hand},{"current_bid",s["bid"]},{"current_bid_truth_prior",s["bid"].is_null()?json(nullptr):json(callP)},{"action",action},{"action_truth_prior",action["type"]=="bid"?json(truth_prior(action["q"],action["f"],hand,5)):json(nullptr)},{"source",source},{"policy_probability",policyProbability},{"policy_options",s["last_policy_options"]},{"policy_key",policyKey.empty()?json(nullptr):json(policyKey)},{"policy_id",agent=="cfr2"?"fixed5_cfr_v2_100k":(agent=="cfr"||agent=="adaptive"?"fixed5_cfr_100k":"fixed5_heuristic_v1")}};
+      json trace={{"round",s["round"]},{"sequence",s["version"].get<int>()+1},{"scores",s["scores"]},{"hand",hand},{"current_bid",s["bid"]},{"current_bid_truth_prior",s["bid"].is_null()?json(nullptr):json(callP)},{"action",action},{"action_truth_prior",action["type"]=="bid"?json(truth_prior(action["q"],action["f"],hand,5)):json(nullptr)},{"source",source},{"policy_probability",policyProbability},{"policy_options",s["last_policy_options"]},{"policy_key",policyKey.empty()?json(nullptr):json(policyKey)},{"policy_id",agent=="mccfr_external_v1"?"mccfr_external_v1":(agent=="cfr2"?"fixed5_cfr_v2_100k":(agent=="cfr"||agent=="adaptive"?"fixed5_cfr_100k":"fixed5_heuristic_v1"))}};
       if(!s.contains("ai_decisions"))s["ai_decisions"]=json::array();
       s["ai_decisions"].push_back(trace);
     }
@@ -92,6 +126,24 @@ static json choose(json& s,int player){
         int count=0;for(const auto& d:hand)if(d.get<int>()==candidateFace)count++;
         if(count>=target)return finish({{"type","bid"},{"q",target},{"f",candidateFace}},"truthful_probe",nullptr,"");
       }
+  }
+  if(agent=="mccfr_external_v1"){
+    mccfr::Hand privateHand{};for(int i=0;i<5;++i)privateHand[i]=hand[i].get<int>();
+    vector<mccfr::Bid> history;
+    for(const auto& e:s["events"])if(e.value("type",string(""))=="bid"&&e.value("round",0)==s["round"].get<int>())history.push_back({e["q"].get<int>(),e["f"].get<int>()});
+    string key=mccfr::key(s["starter"].get<int>(),player,privateHand,history);
+    auto candidates=mccfr_lookup(key,acts);
+    if(!candidates.empty()){
+      double total=0;for(const auto& item:candidates)total+=item.second;
+      vector<pair<string,double>> options;
+      for(const auto& item:candidates){const auto& a=item.first;options.push_back({a["type"]=="call"?"C":to_string(a["q"].get<int>())+"-"+to_string(a["f"].get<int>()),item.second/total});}
+      sort(options.begin(),options.end(),[](const auto& a,const auto& b){return a.second>b.second;});
+      for(size_t i=0;i<min(size_t(3),options.size());++i)s["last_policy_options"].push_back({{"action",options[i].first},{"weight",options[i].second}});
+      s["last_policy_hit"]=true;
+      double draw=double(next64(s,"policy_rng")%1000000)/1000000*total;
+      for(const auto& item:candidates){draw-=item.second;if(draw<=0)return finish(item.first,"sampled_mccfr",item.second/total,key);}
+      return finish(candidates.back().first,"sampled_mccfr",candidates.back().second/total,key);
+    }
   }
   if(agent=="cfr"||agent=="adaptive"||agent=="cfr2"){
     int q=s["bid"].is_null()?0:s["bid"]["q"].get<int>();

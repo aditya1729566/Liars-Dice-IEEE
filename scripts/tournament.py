@@ -42,13 +42,20 @@ def main():
         'cfr':ROOT/'policies'/'fixed5_cfr.json',
         'adaptive':ROOT/'policies'/'fixed5_cfr.json',
         'cfr2':ROOT/'policies'/'fixed5_cfr_v2.json',
+        'mccfr_external_v1':ROOT/'policies'/'mccfr_external_v1.bin',
     }
     used_policy_paths=sorted({policy_paths[a] for a in args.agents if a in policy_paths})
     for path in used_policy_paths:
         if not path.exists():raise SystemExit(f'trained agent requires {path.relative_to(ROOT)}')
-        policy=json.loads(path.read_text())
-        if policy.get('ruleset')!='fixed5_score5_quantity_only_v1' or not policy.get('policy'):
-            raise SystemExit(f'trained policy missing or incompatible: {path.relative_to(ROOT)}')
+        if path.suffix == '.bin':
+            import struct
+            raw=path.read_bytes()
+            if len(raw)<16 or raw[:8]!=b'MCCFR1\0\0' or len(raw)!=16+68*struct.unpack('<Q',raw[8:16])[0]:
+                raise SystemExit(f'trained policy missing or incompatible: {path.relative_to(ROOT)}')
+        else:
+            policy=json.loads(path.read_text())
+            if policy.get('ruleset')!='fixed5_score5_quantity_only_v1' or not policy.get('policy'):
+                raise SystemExit(f'trained policy missing or incompatible: {path.relative_to(ROOT)}')
     folder=ROOT/'experiments'/'runs'/args.run_id
     folder.mkdir(parents=True,exist_ok=False)
     plan=list(itertools.combinations(args.agents,2))

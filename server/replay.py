@@ -58,6 +58,8 @@ def ai_action_read(kind, bid, decision, ai_hand, prior):
     weight = decision.get("policy_probability")
     if source == "sampled_cfr" and weight is not None:
         selection = f"I sampled this action from my trained policy with {weight * 100:.1f}% weight."
+    elif source == "sampled_mccfr" and weight is not None:
+        selection = f"The Monte Carlo sampled this action from its external-sampling MCCFR policy with {weight * 100:.1f}% weight."
     elif source == "uniform_random":
         selection = "I sampled a legal action uniformly at random."
     elif source == "adaptive_public_outcomes":
@@ -68,7 +70,8 @@ def ai_action_read(kind, bid, decision, ai_hand, prior):
         selection = f"The recorded action source was {source.replace('_', ' ')}."
     if bid is None:
         return selection
-    return (f"{selection} I held {ai_hand.count(bid['f'])} matching dice. "
+    matching = ai_hand.count(bid['f'])
+    return (f"{selection} I held {matching} matching {'die' if matching == 1 else 'dice'}. "
             f"The fair-dice truth prior for {claim_text(bid)} was {prior * 100:.1f}%. "
             "That prior is not a strategic posterior or a claim about my chance of winning.")
 

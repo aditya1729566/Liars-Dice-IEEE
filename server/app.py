@@ -20,18 +20,21 @@ ENGINE = ROOT / "build" / "bluff_engine"
 DB = ROOT / "data" / "matches.sqlite3"
 LOCK = threading.RLock()
 RULESET = "fixed5_score5_quantity_only_v1"
-AGENTS = {"random", "probability", "aggressive", "cfr2", "adaptive"}
+AGENTS = {"random", "probability", "aggressive", "cfr2", "adaptive", "mccfr_external_v1"}
 ALLOWED_ORIGINS = {"http://localhost:3000", "http://127.0.0.1:3000"}
 
 
 def trained_policy_ok(agent="cfr2"):
-    policy_id = "fixed5_cfr_v2_100k" if agent == "cfr2" else "fixed5_cfr_100k"
-    entries = json.loads((ROOT / "policies" / "index.json").read_text())["policies"]
-    metadata = next((item for item in entries if item["id"] == policy_id), None)
-    if not metadata:
+    try:
+        policy_id = "mccfr_external_v1" if agent == "mccfr_external_v1" else ("fixed5_cfr_v2_100k" if agent == "cfr2" else "fixed5_cfr_100k")
+        entries = json.loads((ROOT / "policies" / "index.json").read_text())["policies"]
+        metadata = next((item for item in entries if item["id"] == policy_id), None)
+        if not metadata:
+            return False
+        policy_path = ROOT / metadata["policy_path"]
+        return policy_path.exists() and hashlib.sha256(policy_path.read_bytes()).hexdigest() == metadata["policy_sha256"]
+    except (OSError, ValueError, KeyError, TypeError):
         return False
-    policy_path = ROOT / metadata["policy_path"]
-    return policy_path.exists() and hashlib.sha256(policy_path.read_bytes()).hexdigest() == metadata["policy_sha256"]
 
 
 def engine(command):
@@ -133,14 +136,14 @@ class Handler(BaseHTTPRequestHandler):
         if method == "GET" and bits == ["api", "rules"]:
             return {"version": RULESET, "faces": 6, "wild": False, "dice_per_player": 5, "target_score": 5, "bid_order": "quantity only", "next_starter": "round loser"}
         if method == "GET" and bits == ["api", "agents"]:
-            policy_versions = {"cfr2": "fixed5_cfr_v2_100k", "adaptive": "fixed5_cfr_100k"}
-            return {"agents": [{"id": a, "policy_version": policy_versions.get(a, "fixed5_heuristic_v1"), "available": trained_policy_ok(a) if a in policy_versions else True, "trained": a == "cfr2", "uses_trained_base": a == "adaptive", "scope": "wider imperfect-recall one-round CFR abstraction" if a == "cfr2" else ("public-outcome model plus original CFR base" if a == "adaptive" else "heuristic")} for a in sorted(AGENTS)]}
+            policy_versions = {"cfr2": "fixed5_cfr_v2_100k", "adaptive": "fixed5_cfr_100k", "mccfr_external_v1": "mccfr_external_v1"}
+            return {"agents": [{"id": a, "policy_version": policy_versions.get(a, "fixed5_heuristic_v1"), "available": trained_policy_ok(a) if a in policy_versions else True, "trained": a in {"cfr2", "mccfr_external_v1"}, "uses_trained_base": a == "adaptive", "scope": "external-sampling MCCFR one-round imperfect-recall abstraction" if a == "mccfr_external_v1" else ("wider imperfect-recall one-round CFR abstraction" if a == "cfr2" else ("public-outcome model plus original CFR base" if a == "adaptive" else "heuristic"))} for a in sorted(AGENTS)]}
         if method == "POST" and bits == ["api", "matches"]:
             request = self.body()
             n, agent = request.get("n", 5), request.get("agent", "probability")
             if n != 5 or agent not in AGENTS:
                 raise ValueError("this game requires five dice and a supported agent")
-            if agent in {"cfr2", "adaptive"} and not trained_policy_ok(agent):
+            if agent in {"cfr2", "adaptive", "mccfr_external_v1"} and not trained_policy_ok(agent):
                 raise ValueError("trained policy checksum failed")
             result = engine({"op": "new", "n": 5, "agent": agent})
             match_id = secrets.token_urlsafe(18)

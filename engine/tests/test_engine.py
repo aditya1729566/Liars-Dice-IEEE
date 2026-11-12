@@ -1,5 +1,7 @@
 import json
+import hashlib
 import subprocess
+import tempfile
 import unittest
 from pathlib import Path
 BIN=Path(__file__).resolve().parents[2]/'build'/'bluff_engine'
@@ -7,6 +9,12 @@ def call(value):
     p=subprocess.run([str(BIN)],input=json.dumps(value),text=True,capture_output=True)
     return p.returncode,json.loads(p.stdout)
 class EngineTests(unittest.TestCase):
+    def test_existing_policy_artifacts_unchanged(self):
+        root=BIN.parents[1]
+        expected={'fixed5_cfr.json':'9054a212e2865189ee9358e344e3fba48298408edb96fbf8cc343e75d005b977',
+                  'fixed5_cfr_v2.json':'d99c9c002989c65fed62348b8ea623974436b7ebc75f9a0821c6e5edee99d9a8'}
+        for name,digest in expected.items():
+            self.assertEqual(hashlib.sha256((root/'policies'/name).read_bytes()).hexdigest(),digest)
     def fresh(self,seed=4):return call({'op':'new','n':5,'seed':seed,'agent':'probability','auto_ai':False})[1]['state']
     def step(self,s,a):
         code,out=call({'op':'step','state':s,'action':a});self.assertEqual(code,0,out);return out['state']
@@ -72,7 +80,7 @@ class EngineTests(unittest.TestCase):
         self.assertTrue(decision['policy_options'])
         self.assertTrue(all(0<=item['weight']<=1 for item in decision['policy_options']))
     def test_trained_agents_choose_legal_actions(self):
-        hits={'cfr':0,'adaptive':0,'cfr2':0}
+        hits={'cfr':0,'adaptive':0,'cfr2':0,'mccfr_external_v1':0}
         for agent in hits:
             for seed in range(30,40):
                 s=call({'op':'new','n':5,'seed':seed,'agent':agent,'agent_human':'probability','auto_ai':False})[1]['state']
@@ -91,8 +99,9 @@ class EngineTests(unittest.TestCase):
         self.assertGreater(hits['cfr'],0)
         self.assertGreater(hits['adaptive'],0)
         self.assertGreater(hits['cfr2'],0)
+        self.assertGreater(hits['mccfr_external_v1'],0)
     def test_ai_choice_does_not_use_hidden_human_dice(self):
-        for agent in ('probability','cfr','adaptive','cfr2'):
+        for agent in ('probability','cfr','adaptive','cfr2','mccfr_external_v1'):
             s=call({'op':'new','n':5,'seed':42,'agent':agent,'auto_ai':False})[1]['state']
             s['turn']=1
             variants=[]
@@ -102,6 +111,17 @@ class EngineTests(unittest.TestCase):
                 self.assertEqual(code,0,out)
                 variants.append(out['action'])
             self.assertEqual(variants[0],variants[1],agent)
+    def test_mccfr_corrupt_policy_uses_legal_fallback(self):
+        s=call({'op':'new','n':5,'seed':42,'agent':'mccfr_external_v1','auto_ai':False})[1]['state']
+        s['turn']=1
+        with tempfile.TemporaryDirectory() as folder:
+            policy_dir=Path(folder)/'policies';policy_dir.mkdir()
+            (policy_dir/'mccfr_external_v1.bin').write_bytes(b'corrupt')
+            result=subprocess.run([str(BIN)],cwd=folder,input=json.dumps({'op':'bot_step','state':s}),text=True,capture_output=True)
+            self.assertEqual(result.returncode,0,result.stdout)
+            out=json.loads(result.stdout)
+            self.assertFalse(out['policy_hit'])
+            self.assertIn(out['action'],call({'op':'legal','state':s})[1]['actions'])
     def test_adaptive_models_opponent_in_either_seat(self):
         s=call({'op':'new','n':5,'seed':42,'agent':'probability','agent_human':'adaptive','auto_ai':False})[1]['state']
         s['starter']=0;s['turn']=0;s['bid']={'q':2,'f':2};s['bidder']=1

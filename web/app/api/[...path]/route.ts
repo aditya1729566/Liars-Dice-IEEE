@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 const root = join(process.cwd(), 'runtime');
 const ruleset = 'fixed5_score5_quantity_only_v1';
-const agents = new Set(['random', 'probability', 'aggressive', 'cfr2', 'adaptive']);
+const agents = new Set(['random', 'probability', 'aggressive', 'cfr2', 'adaptive', 'mccfr_external_v1']);
 type State = ReplayState & { ruleset: string; agent: string; version: number; phase: string; hands: number[][] };
 type StoredMatch = { state: State; created: number; requests: Record<string, object> };
 type EngineResult = { state?: State; view?: Record<string, unknown>; probability?: number; error?: string };
@@ -28,10 +28,10 @@ function engine(command: object): EngineResult {
     throw new Error('game engine failed');
   }
 }
-function policyOk(): boolean {
+function policyOk(ids = ['fixed5_cfr_100k', 'fixed5_cfr_v2_100k']): boolean {
   try {
     const entries = JSON.parse(readFileSync(join(root, 'policies/index.json'), 'utf8')).policies as { id: string; policy_path: string; policy_sha256: string }[];
-    return ['fixed5_cfr_100k', 'fixed5_cfr_v2_100k'].every(id => {
+    return ids.every(id => {
       const entry = entries.find(item => item.id === id);
       if (!entry) return false;
       const data = readFileSync(join(root, entry.policy_path));
@@ -81,8 +81,8 @@ async function dispatch(method: string, request: Request, bits: string[]): Promi
   }
   if (method === 'GET' && bits.join('/') === 'rules') return { version: ruleset, faces: 6, wild: false, dice_per_player: 5, target_score: 5, bid_order: 'quantity only', next_starter: 'round loser' };
   if (method === 'GET' && bits.join('/') === 'agents') {
-    const versions: Record<string, string> = { cfr2: 'fixed5_cfr_v2_100k', adaptive: 'fixed5_cfr_100k' };
-    return { agents: [...agents].sort().map(id => ({ id, policy_version: versions[id] || 'fixed5_heuristic_v1', available: versions[id] ? policyOk() : true, trained: id === 'cfr2', uses_trained_base: id === 'adaptive', scope: id === 'cfr2' ? 'wider imperfect-recall one-round CFR abstraction' : id === 'adaptive' ? 'public-outcome model plus original CFR base' : 'heuristic' })) };
+    const versions: Record<string, string> = { cfr2: 'fixed5_cfr_v2_100k', adaptive: 'fixed5_cfr_100k', mccfr_external_v1: 'mccfr_external_v1' };
+    return { agents: [...agents].sort().map(id => ({ id, policy_version: versions[id] || 'fixed5_heuristic_v1', available: versions[id] ? policyOk(id === 'mccfr_external_v1' ? ['mccfr_external_v1'] : id === 'cfr2' ? ['fixed5_cfr_v2_100k'] : ['fixed5_cfr_100k']) : true, trained: id === 'cfr2' || id === 'mccfr_external_v1', uses_trained_base: id === 'adaptive', scope: id === 'mccfr_external_v1' ? 'external-sampling MCCFR one-round imperfect-recall abstraction' : id === 'cfr2' ? 'wider imperfect-recall one-round CFR abstraction' : id === 'adaptive' ? 'public-outcome model plus original CFR base' : 'heuristic' })) };
   }
   if (method === 'GET' && bits.join('/') === 'research/summary') {
     const runs = JSON.parse(readFileSync(join(root, 'docs/research_runs.json'), 'utf8')) as object[];
@@ -93,7 +93,7 @@ async function dispatch(method: string, request: Request, bits: string[]): Promi
     const input = await body(request);
     const agent = input.agent ?? 'probability';
     if (input.n !== 5 || typeof agent !== 'string' || !agents.has(agent)) throw new ApiError('this game requires five dice and a supported agent');
-    if (['cfr2', 'adaptive'].includes(agent) && !policyOk()) throw new ApiError('trained policy checksum failed');
+    if (['cfr2', 'adaptive', 'mccfr_external_v1'].includes(agent) && !policyOk(agent === 'mccfr_external_v1' ? ['mccfr_external_v1'] : agent === 'cfr2' ? ['fixed5_cfr_v2_100k'] : ['fixed5_cfr_100k'])) throw new ApiError('trained policy checksum failed');
     const result = engine({ op: 'new', n: 5, agent });
     if (!result.state || !result.view) throw Error('engine returned incomplete match');
     const id = randomBytes(18).toString('base64url');
