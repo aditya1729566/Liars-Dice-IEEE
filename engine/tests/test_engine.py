@@ -15,6 +15,10 @@ class EngineTests(unittest.TestCase):
                   'fixed5_cfr_v2.json':'d99c9c002989c65fed62348b8ea623974436b7ebc75f9a0821c6e5edee99d9a8'}
         for name,digest in expected.items():
             self.assertEqual(hashlib.sha256((root/'policies'/name).read_bytes()).hexdigest(),digest)
+        self.assertEqual(hashlib.sha256((root/'policies/mccfr_external_v1.bin').read_bytes()).hexdigest(),
+                         '6d184abbb39cd577d5cdd7668888fe419b485383e87ce88364743ecf6bb0522c')
+        self.assertEqual(hashlib.sha256((root/'policies/mccfr_external_v1.checkpoint.json.gz').read_bytes()).hexdigest(),
+                         '88cc97410e21f5c791bc4fdde85e9f3142ba154ca6073bf7367d46f9a0936c9e')
     def fresh(self,seed=4):return call({'op':'new','n':5,'seed':seed,'agent':'probability','auto_ai':False})[1]['state']
     def step(self,s,a):
         code,out=call({'op':'step','state':s,'action':a});self.assertEqual(code,0,out);return out['state']
@@ -26,6 +30,14 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(s,self.fresh())
         starters={self.fresh(seed)['starter'] for seed in range(20)}
         self.assertEqual(starters,{0,1})
+    def test_stream_engine_matches_fresh_process(self):
+        commands=[{'op':'new','n':5,'seed':seed,'agent':'mccfr_external_v2','auto_ai':False} for seed in (31,32,33)]
+        commands += [{'op':'bot_step','state':call({'op':'new','n':5,'seed':seed,'agent':'mccfr_external_v2','auto_ai':False})[1]['state']} for seed in (41,42,43)]
+        commands += [{'op':'bot_step','state':call({'op':'new','n':5,'seed':seed,'agent':'cfr2','auto_ai':False})[1]['state']} for seed in (45,46,47)]
+        process=subprocess.run([str(BIN),'--stream'],input='\n'.join(json.dumps(command) for command in commands)+'\n',
+                               text=True,capture_output=True,check=True)
+        streamed=[json.loads(line) for line in process.stdout.splitlines()]
+        self.assertEqual(streamed,[call(command)[1] for command in commands])
     def test_quantity_only_raise_and_forced_call(self):
         s=self.fresh();s=self.step(s,{'type':'bid','q':3,'f':4})
         for bid in ({'type':'bid','q':3,'f':5},{'type':'bid','q':2,'f':6}):
@@ -80,7 +92,7 @@ class EngineTests(unittest.TestCase):
         self.assertTrue(decision['policy_options'])
         self.assertTrue(all(0<=item['weight']<=1 for item in decision['policy_options']))
     def test_trained_agents_choose_legal_actions(self):
-        hits={'cfr':0,'adaptive':0,'cfr2':0,'mccfr_external_v1':0}
+        hits={'cfr':0,'adaptive':0,'cfr2':0,'mccfr_external_v1':0,'mccfr_external_v2':0}
         for agent in hits:
             for seed in range(30,40):
                 s=call({'op':'new','n':5,'seed':seed,'agent':agent,'agent_human':'probability','auto_ai':False})[1]['state']
@@ -97,13 +109,16 @@ class EngineTests(unittest.TestCase):
                 self.assertEqual(s['status'],'COMPLETED')
                 if agent=='mccfr_external_v1':
                     self.assertEqual({d['policy_id'] for d in s['ai_decisions']},{'mccfr_external_v1'})
+                if agent=='mccfr_external_v2':
+                    self.assertEqual({d['policy_id'] for d in s['ai_decisions']},{'mccfr_external_v2'})
                 self.assertTrue(call({'op':'replay','state':s})[1]['valid'])
         self.assertGreater(hits['cfr'],0)
         self.assertGreater(hits['adaptive'],0)
         self.assertGreater(hits['cfr2'],0)
         self.assertGreater(hits['mccfr_external_v1'],0)
+        self.assertGreater(hits['mccfr_external_v2'],0)
     def test_ai_choice_does_not_use_hidden_human_dice(self):
-        for agent in ('probability','cfr','adaptive','cfr2','mccfr_external_v1'):
+        for agent in ('probability','cfr','adaptive','cfr2','mccfr_external_v1','mccfr_external_v2'):
             s=call({'op':'new','n':5,'seed':42,'agent':agent,'auto_ai':False})[1]['state']
             s['turn']=1
             variants=[]
@@ -113,17 +128,27 @@ class EngineTests(unittest.TestCase):
                 self.assertEqual(code,0,out)
                 variants.append(out['action'])
             self.assertEqual(variants[0],variants[1],agent)
+        s=call({'op':'new','n':5,'seed':44,'agent':'probability','agent_human':'mccfr_external_v2','auto_ai':False})[1]['state']
+        s['turn']=0
+        choices=[]
+        for hidden in ([1]*5,[6]*5):
+            changed=json.loads(json.dumps(s));changed['hands'][1]=hidden
+            code,out=call({'op':'bot_step','state':changed})
+            self.assertEqual(code,0,out)
+            choices.append(out['action'])
+        self.assertEqual(choices[0],choices[1])
     def test_mccfr_corrupt_policy_uses_legal_fallback(self):
-        s=call({'op':'new','n':5,'seed':42,'agent':'mccfr_external_v1','auto_ai':False})[1]['state']
-        s['turn']=1
-        with tempfile.TemporaryDirectory() as folder:
-            policy_dir=Path(folder)/'policies';policy_dir.mkdir()
-            (policy_dir/'mccfr_external_v1.bin').write_bytes(b'corrupt')
-            result=subprocess.run([str(BIN)],cwd=folder,input=json.dumps({'op':'bot_step','state':s}),text=True,capture_output=True)
-            self.assertEqual(result.returncode,0,result.stdout)
-            out=json.loads(result.stdout)
-            self.assertFalse(out['policy_hit'])
-            self.assertIn(out['action'],call({'op':'legal','state':s})[1]['actions'])
+        for agent in ('mccfr_external_v1','mccfr_external_v2'):
+            s=call({'op':'new','n':5,'seed':42,'agent':agent,'auto_ai':False})[1]['state']
+            s['turn']=1
+            with tempfile.TemporaryDirectory() as folder:
+                policy_dir=Path(folder)/'policies';policy_dir.mkdir()
+                (policy_dir/f'{agent}.bin').write_bytes(b'corrupt')
+                result=subprocess.run([str(BIN)],cwd=folder,input=json.dumps({'op':'bot_step','state':s}),text=True,capture_output=True)
+                self.assertEqual(result.returncode,0,result.stdout)
+                out=json.loads(result.stdout)
+                self.assertFalse(out['policy_hit'])
+                self.assertIn(out['action'],call({'op':'legal','state':s})[1]['actions'])
     def test_adaptive_models_opponent_in_either_seat(self):
         s=call({'op':'new','n':5,'seed':42,'agent':'probability','agent_human':'adaptive','auto_ai':False})[1]['state']
         s['starter']=0;s['turn']=0;s['bid']={'q':2,'f':2};s['bidder']=1

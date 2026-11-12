@@ -7,6 +7,7 @@ from server import app
 class ApiTests(unittest.TestCase):
     def test_mccfr_checksum_and_missing_metadata(self):
         self.assertTrue(app.trained_policy_ok('mccfr_external_v1'))
+        self.assertTrue(app.trained_policy_ok('mccfr_external_v2'))
         with tempfile.TemporaryDirectory() as folder,patch.object(app,'ROOT',Path(folder)):
             self.assertFalse(app.trained_policy_ok('mccfr_external_v1'))
             policies=Path(folder)/'policies';policies.mkdir()

@@ -5,6 +5,7 @@ web/.next/
 web/runtime/
 build/
 data/
+.cache/
 experiments/runs/
 __pycache__/
 *.pyc

@@ -11,6 +11,7 @@
 #include <vector>
 #include "../vendor/json.hpp"
 #include "mccfr_policy.hpp"
+#include "mccfr_v2_policy.hpp"
 using json=nlohmann::json;
 using namespace std;
 static constexpr const char* RULESET="fixed5_score5_quantity_only_v1";
@@ -64,6 +65,47 @@ static vector<pair<json,double>> mccfr_lookup(const string& key,const json& lega
   if(total<0.999||total>1.001)return {};
   return found;
 }
+static vector<pair<json,double>> mccfr_v2_lookup(const string& key,const json& legalActions){
+  ifstream file("policies/mccfr_external_v2.bin",ios::binary);if(!file)return {};
+  char magic[8]{};uint64_t count=0;file.read(magic,8);file.read(reinterpret_cast<char*>(&count),8);
+  bool packed=memcmp(magic,"MCCFR2Q\0",8)==0;
+  if(!file||(!packed&&memcmp(magic,"MCCFR2\0",8)!=0)||count>5000000)return {};
+  uint64_t recordBytes=packed?mccfr_v2::PACKED_RECORD_BYTES:mccfr_v2::RECORD_BYTES;
+  file.seekg(0,ios::end);
+  if(file.tellg()!=streamoff(16+recordBytes*count))return {};
+  auto digest=mccfr_v2::digest(key);uint64_t lo=0,hi=count;
+  while(lo<hi){
+    uint64_t mid=lo+(hi-lo)/2;file.seekg(streamoff(16+recordBytes*mid));
+    array<uint8_t,16> found{};file.read(reinterpret_cast<char*>(found.data()),found.size());if(!file)return {};
+    if(found<digest)lo=mid+1;else hi=mid;
+  }
+  if(lo==count)return {};
+  file.seekg(streamoff(16+recordBytes*lo));
+  array<uint8_t,16> found{};uint8_t n=0;
+  array<uint8_t,mccfr_v2::MAX_ACTIONS> ids{};
+  array<float,mccfr_v2::MAX_ACTIONS> weights{};
+  file.read(reinterpret_cast<char*>(found.data()),found.size());
+  file.read(reinterpret_cast<char*>(&n),1);
+  file.read(reinterpret_cast<char*>(ids.data()),ids.size());
+  if(packed){
+    array<uint16_t,mccfr_v2::MAX_ACTIONS> quantized{};
+    file.read(reinterpret_cast<char*>(quantized.data()),quantized.size()*sizeof(uint16_t));
+    uint32_t sum=0;for(int i=0;i<n&&i<mccfr_v2::MAX_ACTIONS;++i)sum+=quantized[i];
+    if(sum!=65535)return {};
+    for(int i=0;i<mccfr_v2::MAX_ACTIONS;++i)weights[i]=double(quantized[i])/65535.0;
+  }else file.read(reinterpret_cast<char*>(weights.data()),weights.size()*sizeof(float));
+  if(!file||found!=digest||n==0||n>mccfr_v2::MAX_ACTIONS)return {};
+  vector<pair<json,double>> candidates;double total=0;
+  for(int i=0;i<n;++i){
+    if(ids[i]>60||!isfinite(weights[i])||weights[i]<0)return {};
+    if(find(ids.begin(),ids.begin()+i,ids[i])!=ids.begin()+i)return {};
+    json action=ids[i]==0?json({{"type","call"}}):json({{"type","bid"},{"q",mccfr_v2::bid_for(ids[i]).q},{"f",mccfr_v2::bid_for(ids[i]).f}});
+    if(find(legalActions.begin(),legalActions.end(),action)==legalActions.end())return {};
+    if(weights[i]>0){candidates.push_back({action,weights[i]});total+=weights[i];}
+  }
+  if(total<0.999||total>1.001)return {};
+  return candidates;
+}
 static void roll(json& s){
   s["hands"]=json::array({json::array(),json::array()});
   for(int p=0;p<2;p++)for(int i=0;i<5;i++)s["hands"][p].push_back(die(s));
@@ -104,12 +146,13 @@ static json choose(json& s,int player){
   json acts=legal(s);if(acts.empty())throw runtime_error("no actions");
   string agent=player==1?s.value("agent",string("random")):s.value("agent_human",string("random"));
   s["last_policy_hit"]=false;
+  s["last_policy_source"]=nullptr;
   s["last_policy_options"]=json::array();
   if(agent=="switcher")agent=s["round"].get<int>()<=3?"aggressive":"conservative";
   json hand=s["hands"][player];double callP=s["bid"].is_null()?1:truth_prior(s["bid"]["q"],s["bid"]["f"],hand,5);
   auto finish=[&](const json& action,const string& source,const json& policyProbability,const string& policyKey)->json{
     if(player==1){
-      json trace={{"round",s["round"]},{"sequence",s["version"].get<int>()+1},{"scores",s["scores"]},{"hand",hand},{"current_bid",s["bid"]},{"current_bid_truth_prior",s["bid"].is_null()?json(nullptr):json(callP)},{"action",action},{"action_truth_prior",action["type"]=="bid"?json(truth_prior(action["q"],action["f"],hand,5)):json(nullptr)},{"source",source},{"policy_probability",policyProbability},{"policy_options",s["last_policy_options"]},{"policy_key",policyKey.empty()?json(nullptr):json(policyKey)},{"policy_id",agent=="mccfr_external_v1"?"mccfr_external_v1":(agent=="cfr2"?"fixed5_cfr_v2_100k":(agent=="cfr"||agent=="adaptive"?"fixed5_cfr_100k":"fixed5_heuristic_v1"))}};
+      json trace={{"round",s["round"]},{"sequence",s["version"].get<int>()+1},{"scores",s["scores"]},{"hand",hand},{"current_bid",s["bid"]},{"current_bid_truth_prior",s["bid"].is_null()?json(nullptr):json(callP)},{"action",action},{"action_truth_prior",action["type"]=="bid"?json(truth_prior(action["q"],action["f"],hand,5)):json(nullptr)},{"source",source},{"policy_probability",policyProbability},{"policy_options",s["last_policy_options"]},{"policy_key",policyKey.empty()?json(nullptr):json(policyKey)},{"policy_id",agent=="mccfr_external_v2"?"mccfr_external_v2":(agent=="mccfr_external_v1"?"mccfr_external_v1":(agent=="cfr2"?"fixed5_cfr_v2_100k":(agent=="cfr"||agent=="adaptive"?"fixed5_cfr_100k":"fixed5_heuristic_v1")))}};
       if(!s.contains("ai_decisions"))s["ai_decisions"]=json::array();
       s["ai_decisions"].push_back(trace);
     }
@@ -145,6 +188,32 @@ static json choose(json& s,int player){
       return finish(candidates.back().first,"sampled_mccfr",candidates.back().second/total,key);
     }
   }
+  if(agent=="mccfr_external_v2"){
+    mccfr_v2::Hand private_hand{};for(int i=0;i<5;++i)private_hand[i]=hand[i].get<int>();
+    vector<mccfr_v2::Bid> history;
+    for(const auto& event:s["events"])
+      if(event.value("type",string(""))=="bid"&&event.value("round",0)==s["round"].get<int>())
+        history.push_back({event["q"].get<int>(),event["f"].get<int>()});
+    string key=mccfr_v2::fine_key(s["starter"].get<int>(),player,private_hand,history);
+    auto candidates=mccfr_v2_lookup(key,acts);string tier="exact";
+    if(candidates.empty()){
+      key=mccfr_v2::backoff_key(s["starter"].get<int>(),player,private_hand,history);
+      candidates=mccfr_v2_lookup(key,acts);tier="backoff";
+    }
+    if(!candidates.empty()){
+      double total=0;vector<pair<string,double>> options;
+      for(const auto& item:candidates){
+        total+=item.second;const auto& action=item.first;
+        options.push_back({action["type"]=="call"?"C":to_string(action["q"].get<int>())+"-"+to_string(action["f"].get<int>()),item.second});
+      }
+      sort(options.begin(),options.end(),[](const auto& a,const auto& b){return a.second>b.second;});
+      for(size_t i=0;i<min(size_t(3),options.size());++i)s["last_policy_options"].push_back({{"action",options[i].first},{"weight",options[i].second/total}});
+      s["last_policy_hit"]=true;s["last_policy_source"]=tier;
+      double draw=double(next64(s,"policy_rng")%1000000)/1000000*total;
+      for(const auto& item:candidates){draw-=item.second;if(draw<=0)return finish(item.first,"sampled_mccfr_v2_"+tier,item.second/total,key);}
+      return finish(candidates.back().first,"sampled_mccfr_v2_"+tier,candidates.back().second/total,key);
+    }
+  }
   if(agent=="cfr"||agent=="adaptive"||agent=="cfr2"){
     int q=s["bid"].is_null()?0:s["bid"]["q"].get<int>();
     int f=s["bid"].is_null()?0:s["bid"]["f"].get<int>();
@@ -158,9 +227,17 @@ static json choose(json& s,int player){
       }
       key=to_string(s["starter"].get<int>())+"|"+to_string(player)+"|"+to_string(modal)+"|"+to_string(modalCount)+"|"+to_string(previousQ)+"|"+to_string(previousF)+"|"+to_string(q)+"|"+to_string(f)+"|"+to_string(k);
     }
-    std::ifstream file(agent=="cfr2"?"policies/fixed5_cfr_v2.json":"policies/fixed5_cfr.json");
-    if(file){try{
-      json saved=json::parse(file);if(saved.value("ruleset",string(""))!=RULESET)throw runtime_error("policy ruleset mismatch");
+    static json original_saved=nullptr,cfr2_saved=nullptr;
+    static bool original_attempted=false,cfr2_attempted=false;
+    json& saved=agent=="cfr2"?cfr2_saved:original_saved;
+    bool& attempted=agent=="cfr2"?cfr2_attempted:original_attempted;
+    if(!attempted){
+      attempted=true;
+      std::ifstream file(agent=="cfr2"?"policies/fixed5_cfr_v2.json":"policies/fixed5_cfr.json");
+      if(file)try{saved=json::parse(file);}catch(const exception&){}
+    }
+    if(!saved.is_null()){try{
+      if(saved.value("ruleset",string(""))!=RULESET)throw runtime_error("policy ruleset mismatch");
       const json& table=saved.at("policy");
       if(table.contains(key)){
         vector<pair<json,double>> candidates;double total=0;
@@ -228,7 +305,7 @@ static json run(const json& c){
   if(op=="bot_step"){
     if(s["phase"]!="BIDDING")throw runtime_error("round is over");
     int p=s["turn"].get<int>();json observation={{"player",name(p)},{"hand",s["hands"][p]},{"scores",s["scores"]},{"bid",s["bid"]},{"round",s["round"]},{"legal_actions",legal(s)}};
-    json a=choose(s,p);bool policyHit=s.value("last_policy_hit",false);apply_action(s,a);return {{"state",s},{"action",a},{"observation",observation},{"policy_hit",policyHit}};
+    json a=choose(s,p);bool policyHit=s.value("last_policy_hit",false);json policySource=s.value("last_policy_source",json(nullptr));apply_action(s,a);return {{"state",s},{"action",a},{"observation",observation},{"policy_hit",policyHit},{"policy_source",policySource}};
   }
   if(op=="replay"){
     json rebuilt=new_game({{"seed",s["initial_seed"]},{"agent",s["agent"]},{"agent_human",s.value("agent_human",string("random"))}});
@@ -242,4 +319,14 @@ static json run(const json& c){
   }
   throw runtime_error("unknown operation");
 }
-int main(){try{json c;cin>>c;cout<<run(c).dump()<<endl;return 0;}catch(const exception& e){cout<<json({{"error",e.what()}}).dump()<<endl;return 1;}}
+int main(int argc,char** argv){
+  if(argc==2&&string(argv[1])=="--stream"){
+    string line;
+    while(getline(cin,line))try{cout<<run(json::parse(line)).dump()<<endl;}
+    catch(const exception& e){cout<<json({{"error",e.what()}}).dump()<<endl;}
+    return 0;
+  }
+  if(argc!=1)return 1;
+  try{json c;cin>>c;cout<<run(c).dump()<<endl;return 0;}
+  catch(const exception& e){cout<<json({{"error",e.what()}}).dump()<<endl;return 1;}
+}

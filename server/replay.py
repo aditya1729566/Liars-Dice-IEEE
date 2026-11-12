@@ -60,6 +60,13 @@ def ai_action_read(kind, bid, decision, ai_hand, prior):
         selection = f"I sampled this action from my trained policy with {weight * 100:.1f}% weight."
     elif source == "sampled_mccfr" and weight is not None:
         selection = f"The Monte Carlo sampled this action from its external-sampling MCCFR policy with {weight * 100:.1f}% weight."
+    elif source.startswith("sampled_mccfr_v2_") and weight is not None:
+        tier = "learned backoff" if source.endswith("backoff") else "exact information-set"
+        selection = f"The Monte Carlo II sampled this action from its {tier} policy with {weight * 100:.1f}% weight."
+    elif source == "rebel_transfer_depth1_fp4" and weight is not None:
+        selection = (f"The ReBeL transfer search sampled this action with {weight * 100:.1f}% weight "
+                     "after four depth-one fictitious-play iterations. Its value network was trained "
+                     "under different wild and bid rules, so this is an approximate transfer policy.")
     elif source == "uniform_random":
         selection = "I sampled a legal action uniformly at random."
     elif source == "adaptive_public_outcomes":

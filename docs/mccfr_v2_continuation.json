@@ -1,0 +1,13 @@
+{
+  "ruleset": "fixed5_score5_quantity_only_v1",
+  "agent": "mccfr_external_v1",
+  "completed_rounds": 2000,
+  "starter_wins": 1083,
+  "starter_win_rate": 0.5415,
+  "wilson95": [
+    0.5196033826641852,
+    0.5632374965749721
+  ],
+  "elapsed_seconds": 23.5700051659951,
+  "seed_offset": 8600000
+}

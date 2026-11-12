@@ -1,0 +1,50 @@
+{
+  "algorithm": "external-sampling MCCFR",
+  "command": [
+    "/Users/adityaagrawal/Documents/Codex/2026-11-07/re/build/mccfr_v2_trainer",
+    "--run-id",
+    "mccfr_v2_fresh_10m_20261112",
+    "--seed",
+    "20261112",
+    "--iterations",
+    "10000000",
+    "--milestones",
+    "5000000,10000000",
+    "--continuation",
+    "/Users/adityaagrawal/Documents/Codex/2026-11-07/re/experiments/runs/mccfr_v2_continuation_20261112/continuation.json",
+    "--git-commit",
+    "1fbcaa960ad7db1f17ae461868971d5b449bd81b"
+  ],
+  "continuation_file": "/Users/adityaagrawal/Documents/Codex/2026-11-07/re/experiments/runs/mccfr_v2_continuation_20261112/continuation.json",
+  "ended_utc": "2026-11-12T13:44:11Z",
+  "enumerate_starters": false,
+  "format_version": 2,
+  "git_commit": "1fbcaa960ad7db1f17ae461868971d5b449bd81b",
+  "iterations_completed": 10000000,
+  "iterations_planned": 10000000,
+  "iterations_resumed_from": 0,
+  "objective": "expected first-to-five match win with frozen v1 continuation",
+  "policy_id": "mccfr_external_v2",
+  "ruleset": "fixed5_score5_quantity_only_v1",
+  "run_id": "mccfr_v2_fresh_10m_20261112",
+  "seed": 20261112,
+  "segments": [
+    {
+      "backoff_information_sets": 57960,
+      "elapsed_seconds": 1534.630192916,
+      "fine_information_sets": 956380,
+      "from": 0,
+      "peak_memory_bytes": 775241728,
+      "sampled_terminal_histories": 1957731975,
+      "to": 10000000
+    }
+  ],
+  "started_utc": "2026-11-12T13:18:36Z",
+  "starter_win_probability": 0.5415,
+  "status": "completed",
+  "workers": 1,
+  "base_git_commit": "1fbcaa960ad7db1f17ae461868971d5b449bd81b",
+  "source_dirty_at_training": true,
+  "trainer_binary_sha256": "6515f592309f85221f66876e2dbad424b0aa0744dd288e7dba51c680be5fd4b4",
+  "provenance_note": "git_commit was the clean starting base, not a commit of the new trainer; the trainer binary hash identifies the executed build."
+}

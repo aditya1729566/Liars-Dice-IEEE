@@ -12,21 +12,23 @@ from pathlib import Path
 from urllib.parse import urlsplit
 try:
     from .replay import build_replay
+    from . import rebel_runtime
 except ImportError:  # Direct `python server/app.py` launch.
     from replay import build_replay
+    import rebel_runtime
 
 ROOT = Path(__file__).resolve().parents[1]
 ENGINE = ROOT / "build" / "bluff_engine"
 DB = ROOT / "data" / "matches.sqlite3"
 LOCK = threading.RLock()
 RULESET = "fixed5_score5_quantity_only_v1"
-AGENTS = {"random", "probability", "aggressive", "cfr2", "adaptive", "mccfr_external_v1"}
+AGENTS = {"random", "probability", "aggressive", "cfr2", "adaptive", "mccfr_external_v1", "mccfr_external_v2", "rebel_transfer_v1"}
 ALLOWED_ORIGINS = {"http://localhost:3000", "http://127.0.0.1:3000"}
 
 
 def trained_policy_ok(agent="cfr2"):
     try:
-        policy_id = "mccfr_external_v1" if agent == "mccfr_external_v1" else ("fixed5_cfr_v2_100k" if agent == "cfr2" else "fixed5_cfr_100k")
+        policy_id = agent if agent in {"mccfr_external_v1", "mccfr_external_v2"} else ("fixed5_cfr_v2_100k" if agent == "cfr2" else "fixed5_cfr_100k")
         entries = json.loads((ROOT / "policies" / "index.json").read_text())["policies"]
         metadata = next((item for item in entries if item["id"] == policy_id), None)
         if not metadata:
@@ -47,6 +49,32 @@ def engine(command):
     if result.returncode or "error" in value:
         raise ValueError(value.get("error", result.stderr or "engine failed"))
     return value
+
+
+def rebel_step(match_id, state):
+    if state["phase"] != "BIDDING" or state["turn"] != 1:
+        return {"state": state, "view": engine({"op": "view", "state": state})["view"]}
+    decision = rebel_runtime.choose(match_id, state)
+    action = decision["action"]
+    metadata = decision["metadata"]
+    own_hand = state["hands"][1]
+    current = state["bid"]
+    def prior(bid):
+        return engine({"op": "prior", "q": bid["q"], "f": bid["f"],
+                       "hand": own_hand, "unknown": 5})["probability"] if bid else None
+    trace = {"round": state["round"], "sequence": state["version"] + 1,
+             "scores": state["scores"], "hand": own_hand, "current_bid": current,
+             "current_bid_truth_prior": prior(current), "action": action,
+             "action_truth_prior": prior(action) if action["type"] == "bid" else None,
+             "source": "rebel_transfer_depth1_fp4",
+             "policy_probability": metadata["policy_probability"],
+             "policy_options": metadata["policy_options"], "policy_key": None,
+             "policy_id": "rebel_transfer_v1",
+             "search_elapsed_ms": metadata["search_elapsed_ms"],
+             "search_tree_size": metadata["search_tree_size"]}
+    result = engine({"op": "step", "state": state, "action": action})
+    result["state"].setdefault("ai_decisions", []).append(trace)
+    return result
 
 
 def connection():
@@ -136,17 +164,24 @@ class Handler(BaseHTTPRequestHandler):
         if method == "GET" and bits == ["api", "rules"]:
             return {"version": RULESET, "faces": 6, "wild": False, "dice_per_player": 5, "target_score": 5, "bid_order": "quantity only", "next_starter": "round loser"}
         if method == "GET" and bits == ["api", "agents"]:
-            policy_versions = {"cfr2": "fixed5_cfr_v2_100k", "adaptive": "fixed5_cfr_100k", "mccfr_external_v1": "mccfr_external_v1"}
-            return {"agents": [{"id": a, "policy_version": policy_versions.get(a, "fixed5_heuristic_v1"), "available": trained_policy_ok(a) if a in policy_versions else True, "trained": a in {"cfr2", "mccfr_external_v1"}, "uses_trained_base": a == "adaptive", "scope": "external-sampling MCCFR one-round imperfect-recall abstraction" if a == "mccfr_external_v1" else ("wider imperfect-recall one-round CFR abstraction" if a == "cfr2" else ("public-outcome model plus original CFR base" if a == "adaptive" else "heuristic"))} for a in sorted(AGENTS)]}
+            policy_versions = {"cfr2": "fixed5_cfr_v2_100k", "adaptive": "fixed5_cfr_100k", "mccfr_external_v1": "mccfr_external_v1", "mccfr_external_v2": "mccfr_external_v2", "rebel_transfer_v1": "rebel_transfer_v1"}
+            return {"agents": [{"id": a, "policy_version": policy_versions.get(a, "fixed5_heuristic_v1"), "available": rebel_runtime.available() if a == "rebel_transfer_v1" else (trained_policy_ok(a) if a in policy_versions else True), "trained": a in {"cfr2", "mccfr_external_v1", "mccfr_external_v2", "rebel_transfer_v1"}, "uses_trained_base": a == "adaptive", "scope": "transferred ReBeL checkpoint with depth-one public-belief search; trained under different wild and bid rules" if a == "rebel_transfer_v1" else ("external-sampling MCCFR with wider bids and depth-limited match utility" if a == "mccfr_external_v2" else ("external-sampling MCCFR one-round imperfect-recall abstraction" if a == "mccfr_external_v1" else ("wider imperfect-recall one-round CFR abstraction" if a == "cfr2" else ("public-outcome model plus original CFR base" if a == "adaptive" else "heuristic"))))} for a in sorted(AGENTS)]}
         if method == "POST" and bits == ["api", "matches"]:
             request = self.body()
             n, agent = request.get("n", 5), request.get("agent", "probability")
             if n != 5 or agent not in AGENTS:
                 raise ValueError("this game requires five dice and a supported agent")
-            if agent in {"cfr2", "adaptive", "mccfr_external_v1"} and not trained_policy_ok(agent):
+            if agent in {"cfr2", "adaptive", "mccfr_external_v1", "mccfr_external_v2"} and not trained_policy_ok(agent):
                 raise ValueError("trained policy checksum failed")
-            result = engine({"op": "new", "n": 5, "agent": agent})
             match_id = secrets.token_urlsafe(18)
+            if agent == "rebel_transfer_v1":
+                if not rebel_runtime.available():
+                    raise ValueError("ReBeL runtime unavailable; run make setup-rebel")
+                result = engine({"op": "new", "n": 5, "agent": agent, "auto_ai": False})
+                if result["state"]["turn"] == 1:
+                    result = rebel_step(match_id, result["state"])
+            else:
+                result = engine({"op": "new", "n": 5, "agent": agent})
             with LOCK, connection() as con:
                 con.execute("INSERT INTO matches VALUES (?,?,?)", (match_id, json.dumps(result["state"]), time.time()))
             return {"id": match_id, "duration_seconds": 0, **result["view"]}
@@ -175,10 +210,12 @@ class Handler(BaseHTTPRequestHandler):
             match_id = bits[2]
             if method == "DELETE" and len(bits) == 3:
                 with LOCK, connection() as con:
-                    read_match(con, match_id)
+                    old_state = read_match(con, match_id)
                     con.execute("DELETE FROM requests WHERE match_id=?", (match_id,))
                     con.execute("DELETE FROM invalid_actions WHERE match_id=?", (match_id,))
                     con.execute("DELETE FROM matches WHERE id=?", (match_id,))
+                if old_state["agent"] == "rebel_transfer_v1":
+                    rebel_runtime.drop(match_id)
                 return {"deleted": True}
             if method == "GET":
                 with connection() as con:
@@ -223,8 +260,15 @@ class Handler(BaseHTTPRequestHandler):
                     s = read_match(con, match_id)
                     if body.get("expected_version") != s["version"]:
                         raise RuntimeError("stale match version")
-                    command = {"op": "act", "state": s, "action": body.get("action", {})} if bits[3:] == ["actions"] else {"op": "next_round", "state": s}
+                    if s["agent"] == "rebel_transfer_v1":
+                        if bits[3:] == ["actions"] and s["turn"] != 0:
+                            raise ValueError("not human turn")
+                        command = {"op": "step", "state": s, "action": body.get("action", {})} if bits[3:] == ["actions"] else {"op": "next_round", "state": s, "auto_ai": False}
+                    else:
+                        command = {"op": "act", "state": s, "action": body.get("action", {})} if bits[3:] == ["actions"] else {"op": "next_round", "state": s}
                     result = engine(command)
+                    if s["agent"] == "rebel_transfer_v1" and result["state"]["phase"] == "BIDDING" and result["state"]["turn"] == 1:
+                        result = rebel_step(match_id, result["state"])
                     response = match_response(con, match_id, result["view"])
                     con.execute("UPDATE matches SET state=? WHERE id=?", (json.dumps(result["state"]), match_id))
                     con.execute("INSERT INTO requests VALUES (?,?,?)", (match_id, key, json.dumps(response)))

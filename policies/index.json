@@ -30,7 +30,7 @@
       "policy_sha256": "d99c9c002989c65fed62348b8ea623974436b7ebc75f9a0821c6e5edee99d9a8",
       "training_run": "fixed5_cfr_v2_100k",
       "evaluation_run": "fixed5_cfr_v2_confirm_400",
-      "champion": true
+      "champion": false
     },
     {
       "id": "mccfr_external_v1",
@@ -47,6 +47,40 @@
       "training_run": "mccfr_committed_repro_20261112",
       "evaluation_run": "mccfr_confirm_2000_20261112",
       "champion": false
+    },
+    {
+      "id": "mccfr_external_v2",
+      "ruleset": "fixed5_score5_quantity_only_v1",
+      "agent_type": "external-sampling MCCFR with public-history abstraction and learned backoff",
+      "training_objective": "depth-limited expected first-to-five win via frozen v1 continuation; imperfect recall",
+      "training_iterations": 5000000,
+      "created_utc": "2026-11-12T13:09:16Z",
+      "seed": 20261112,
+      "parent_checkpoint": "policies/mccfr_external_v2.checkpoint.bin.gz",
+      "checkpoint_sha256": "8f62b02b737ade533c6100200850dc0d8af94f1d31f8c1c826e091e041fb2270",
+      "policy_path": "policies/mccfr_external_v2.bin",
+      "policy_sha256": "4326b283fe865df94ced77bf5a2053ebe5520caf6c0d5df9ea7bf68c59c88bfb",
+      "training_run": "mccfr_v2_fresh_10m_20261112",
+      "evaluation_run": "mccfr_v2_final_major_20261112",
+      "champion": true,
+      "status": "selected frozen champion"
+    },
+    {
+      "id": "rebel_transfer_v1",
+      "ruleset": "fixed5_score5_quantity_only_v1",
+      "agent_type": "upstream ReBeL value network with local depth-one fictitious-play search",
+      "training_objective": "upstream one-round payoff with highest-face wild and face-ordered bids; transferred without retraining",
+      "training_iterations": null,
+      "source_repository": "https://github.com/shivangijod-creator/ReBeL-Liars-Dice",
+      "source_commit": "1d915cc2dcecf9670aaec652ab78bf528241ce21",
+      "parent_checkpoint": ".cache/rebel-source/checkpoints/rebel_5x6f_epoch_6.pt",
+      "checkpoint_sha256": "028b9708fe60848cd409fde581bee1e92e20aa67b7cbd65c475e7bf0149f2f3a",
+      "policy_path": ".cache/rebel-source/checkpoints/rebel_5x6f_epoch_6.pt",
+      "policy_sha256": "028b9708fe60848cd409fde581bee1e92e20aa67b7cbd65c475e7bf0149f2f3a",
+      "training_run": "upstream epoch 6; not trained in this repository",
+      "evaluation_run": "rebel_transfer_final_20261112",
+      "champion": false,
+      "status": "local-only external dependency; approximate transfer"
     }
   ]
 }

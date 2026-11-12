@@ -22,9 +22,10 @@ class HttpTests(unittest.TestCase):
             try:
                 self.assertTrue(send('/api/health')['policy_ok'])
                 listed=send('/api/agents')['agents']
-                self.assertEqual({x['id'] for x in listed},{'random','probability','aggressive','cfr2','adaptive','mccfr_external_v1'})
-                self.assertTrue(all(x['available'] for x in listed))
+                self.assertEqual({x['id'] for x in listed},{'random','probability','aggressive','cfr2','adaptive','mccfr_external_v1','mccfr_external_v2','rebel_transfer_v1'})
+                self.assertTrue(all(x['available'] for x in listed if x['id']!='rebel_transfer_v1'))
                 self.assertTrue(next(x for x in listed if x['id']=='mccfr_external_v1')['trained'])
+                self.assertTrue(next(x for x in listed if x['id']=='mccfr_external_v2')['trained'])
                 self.assertFalse(next(x for x in listed if x['id']=='adaptive')['trained'])
                 self.assertTrue(next(x for x in listed if x['id']=='adaptive')['uses_trained_base'])
                 denied=urllib.request.Request(base+'/api/matches',method='OPTIONS',headers={'Origin':'https://untrusted.example'})
@@ -44,6 +45,11 @@ class HttpTests(unittest.TestCase):
                 self.assertIsNone(monte['ai_hand'])
                 self.assertNotIn('ai_decisions',monte)
                 self.assertTrue(send(f"/api/matches/{monte['id']}",method='DELETE')['deleted'])
+                monte2=send('/api/matches',{'n':5,'agent':'mccfr_external_v2'})
+                self.assertEqual(monte2['agent'],'mccfr_external_v2')
+                self.assertIsNone(monte2['ai_hand'])
+                self.assertNotIn('ai_decisions',monte2)
+                self.assertTrue(send(f"/api/matches/{monte2['id']}",method='DELETE')['deleted'])
                 with self.assertRaises(urllib.error.HTTPError) as private_report:
                     send(f"/api/matches/{trained['id']}/research")
                 self.assertEqual(private_report.exception.code,409)
