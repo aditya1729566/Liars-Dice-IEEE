@@ -17,8 +17,9 @@ def package(output, run_ids, include_policies=False):
         if not manifest.exists() or json.loads(manifest.read_text()).get('status') != 'completed':
             raise ValueError(f'run is not completed: {run_id}')
         files.extend(path for path in (manifest, folder / 'summary.json', folder / 'mccfr_metrics.json',
-                                       folder / 'mccfr_v2_metrics.json', folder / 'rebel_transfer_v1_metrics.json', folder / 'continuation.json',
-                                       folder / 'rounds.sqlite3', folder / 'evaluation.sqlite3') if path.exists())
+                                       folder / 'mccfr_v2_metrics.json', folder / 'rebel_transfer_v1_metrics.json',
+                                       folder / 'rebel_bluff_v2_metrics.json', folder / 'continuation.json',
+                                       folder / 'policy_seeds.json', folder / 'rounds.sqlite3', folder / 'evaluation.sqlite3') if path.exists())
         if include_policies:
             files.extend(sorted(folder.glob('policy_*.json')))
     output.parent.mkdir(parents=True, exist_ok=True)

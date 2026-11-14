@@ -22,8 +22,8 @@ class HttpTests(unittest.TestCase):
             try:
                 self.assertTrue(send('/api/health')['policy_ok'])
                 listed=send('/api/agents')['agents']
-                self.assertEqual({x['id'] for x in listed},{'random','probability','aggressive','cfr2','adaptive','mccfr_external_v1','mccfr_external_v2','rebel_transfer_v1'})
-                self.assertTrue(all(x['available'] for x in listed if x['id']!='rebel_transfer_v1'))
+                self.assertEqual({x['id'] for x in listed},{'random','probability','aggressive','cfr2','adaptive','mccfr_external_v1','mccfr_external_v2','rebel_transfer_v1','rebel_bluff_v2'})
+                self.assertTrue(all(x['available'] for x in listed if x['id'] not in {'rebel_transfer_v1','rebel_bluff_v2'}))
                 self.assertTrue(next(x for x in listed if x['id']=='mccfr_external_v1')['trained'])
                 self.assertTrue(next(x for x in listed if x['id']=='mccfr_external_v2')['trained'])
                 self.assertFalse(next(x for x in listed if x['id']=='adaptive')['trained'])

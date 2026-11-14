@@ -12,17 +12,19 @@ from pathlib import Path
 from urllib.parse import urlsplit
 try:
     from .replay import build_replay
-    from . import rebel_runtime
+    from . import rebel_runtime, rebel_v2_runtime
 except ImportError:  # Direct `python server/app.py` launch.
     from replay import build_replay
     import rebel_runtime
+    import rebel_v2_runtime
 
 ROOT = Path(__file__).resolve().parents[1]
 ENGINE = ROOT / "build" / "bluff_engine"
 DB = ROOT / "data" / "matches.sqlite3"
 LOCK = threading.RLock()
 RULESET = "fixed5_score5_quantity_only_v1"
-AGENTS = {"random", "probability", "aggressive", "cfr2", "adaptive", "mccfr_external_v1", "mccfr_external_v2", "rebel_transfer_v1"}
+AGENTS = {"random", "probability", "aggressive", "cfr2", "adaptive", "mccfr_external_v1", "mccfr_external_v2", "rebel_transfer_v1", "rebel_bluff_v2"}
+REBEL_AGENTS = {"rebel_transfer_v1", "rebel_bluff_v2"}
 ALLOWED_ORIGINS = {"http://localhost:3000", "http://127.0.0.1:3000"}
 
 
@@ -54,7 +56,8 @@ def engine(command):
 def rebel_step(match_id, state):
     if state["phase"] != "BIDDING" or state["turn"] != 1:
         return {"state": state, "view": engine({"op": "view", "state": state})["view"]}
-    decision = rebel_runtime.choose(match_id, state)
+    updated = state["agent"] == "rebel_bluff_v2"
+    decision = (rebel_v2_runtime if updated else rebel_runtime).choose(match_id, state)
     action = decision["action"]
     metadata = decision["metadata"]
     own_hand = state["hands"][1]
@@ -66,10 +69,10 @@ def rebel_step(match_id, state):
              "scores": state["scores"], "hand": own_hand, "current_bid": current,
              "current_bid_truth_prior": prior(current), "action": action,
              "action_truth_prior": prior(action) if action["type"] == "bid" else None,
-             "source": "rebel_transfer_depth1_fp4",
+             "source": "rebel_bluff_depth1_fp32" if updated else "rebel_transfer_depth1_fp4",
              "policy_probability": metadata["policy_probability"],
              "policy_options": metadata["policy_options"], "policy_key": None,
-             "policy_id": "rebel_transfer_v1",
+             "policy_id": state["agent"],
              "search_elapsed_ms": metadata["search_elapsed_ms"],
              "search_tree_size": metadata["search_tree_size"]}
     result = engine({"op": "step", "state": state, "action": action})
@@ -164,8 +167,13 @@ class Handler(BaseHTTPRequestHandler):
         if method == "GET" and bits == ["api", "rules"]:
             return {"version": RULESET, "faces": 6, "wild": False, "dice_per_player": 5, "target_score": 5, "bid_order": "quantity only", "next_starter": "round loser"}
         if method == "GET" and bits == ["api", "agents"]:
-            policy_versions = {"cfr2": "fixed5_cfr_v2_100k", "adaptive": "fixed5_cfr_100k", "mccfr_external_v1": "mccfr_external_v1", "mccfr_external_v2": "mccfr_external_v2", "rebel_transfer_v1": "rebel_transfer_v1"}
-            return {"agents": [{"id": a, "policy_version": policy_versions.get(a, "fixed5_heuristic_v1"), "available": rebel_runtime.available() if a == "rebel_transfer_v1" else (trained_policy_ok(a) if a in policy_versions else True), "trained": a in {"cfr2", "mccfr_external_v1", "mccfr_external_v2", "rebel_transfer_v1"}, "uses_trained_base": a == "adaptive", "scope": "transferred ReBeL checkpoint with depth-one public-belief search; trained under different wild and bid rules" if a == "rebel_transfer_v1" else ("external-sampling MCCFR with wider bids and depth-limited match utility" if a == "mccfr_external_v2" else ("external-sampling MCCFR one-round imperfect-recall abstraction" if a == "mccfr_external_v1" else ("wider imperfect-recall one-round CFR abstraction" if a == "cfr2" else ("public-outcome model plus original CFR base" if a == "adaptive" else "heuristic"))))} for a in sorted(AGENTS)]}
+            policy_versions = {"cfr2": "fixed5_cfr_v2_100k", "adaptive": "fixed5_cfr_100k", "mccfr_external_v1": "mccfr_external_v1", "mccfr_external_v2": "mccfr_external_v2", "rebel_transfer_v1": "rebel_transfer_v1", "rebel_bluff_v2": "rebel_bluff_v2"}
+            scopes = {"rebel_transfer_v1": "transferred ReBeL checkpoint trained under different wild and bid rules", "rebel_bluff_v2": "native no-wild, quantity-only BLUFF.EXE checkpoint with depth-one public-belief search; upstream alternates next opener", "mccfr_external_v2": "external-sampling MCCFR with wider bids and depth-limited match utility", "mccfr_external_v1": "external-sampling MCCFR one-round imperfect-recall abstraction", "cfr2": "wider imperfect-recall one-round CFR abstraction", "adaptive": "public-outcome model plus original CFR base"}
+            def available(agent):
+                if agent == "rebel_transfer_v1": return rebel_runtime.available()
+                if agent == "rebel_bluff_v2": return rebel_v2_runtime.available()
+                return trained_policy_ok(agent) if agent in policy_versions else True
+            return {"agents": [{"id": a, "policy_version": policy_versions.get(a, "fixed5_heuristic_v1"), "available": available(a), "trained": a in {"cfr2", "mccfr_external_v1", "mccfr_external_v2", *REBEL_AGENTS}, "uses_trained_base": a == "adaptive", "scope": scopes.get(a, "heuristic")} for a in sorted(AGENTS)]}
         if method == "POST" and bits == ["api", "matches"]:
             request = self.body()
             n, agent = request.get("n", 5), request.get("agent", "probability")
@@ -174,9 +182,10 @@ class Handler(BaseHTTPRequestHandler):
             if agent in {"cfr2", "adaptive", "mccfr_external_v1", "mccfr_external_v2"} and not trained_policy_ok(agent):
                 raise ValueError("trained policy checksum failed")
             match_id = secrets.token_urlsafe(18)
-            if agent == "rebel_transfer_v1":
-                if not rebel_runtime.available():
-                    raise ValueError("ReBeL runtime unavailable; run make setup-rebel")
+            if agent in REBEL_AGENTS:
+                runtime = rebel_v2_runtime if agent == "rebel_bluff_v2" else rebel_runtime
+                if not runtime.available():
+                    raise ValueError("ReBeL runtime unavailable; run make setup-rebel-v2" if agent == "rebel_bluff_v2" else "ReBeL runtime unavailable; run make setup-rebel")
                 result = engine({"op": "new", "n": 5, "agent": agent, "auto_ai": False})
                 if result["state"]["turn"] == 1:
                     result = rebel_step(match_id, result["state"])
@@ -214,8 +223,8 @@ class Handler(BaseHTTPRequestHandler):
                     con.execute("DELETE FROM requests WHERE match_id=?", (match_id,))
                     con.execute("DELETE FROM invalid_actions WHERE match_id=?", (match_id,))
                     con.execute("DELETE FROM matches WHERE id=?", (match_id,))
-                if old_state["agent"] == "rebel_transfer_v1":
-                    rebel_runtime.drop(match_id)
+                if old_state["agent"] in REBEL_AGENTS:
+                    (rebel_v2_runtime if old_state["agent"] == "rebel_bluff_v2" else rebel_runtime).drop(match_id)
                 return {"deleted": True}
             if method == "GET":
                 with connection() as con:
@@ -260,18 +269,20 @@ class Handler(BaseHTTPRequestHandler):
                     s = read_match(con, match_id)
                     if body.get("expected_version") != s["version"]:
                         raise RuntimeError("stale match version")
-                    if s["agent"] == "rebel_transfer_v1":
+                    if s["agent"] in REBEL_AGENTS:
                         if bits[3:] == ["actions"] and s["turn"] != 0:
                             raise ValueError("not human turn")
                         command = {"op": "step", "state": s, "action": body.get("action", {})} if bits[3:] == ["actions"] else {"op": "next_round", "state": s, "auto_ai": False}
                     else:
                         command = {"op": "act", "state": s, "action": body.get("action", {})} if bits[3:] == ["actions"] else {"op": "next_round", "state": s}
                     result = engine(command)
-                    if s["agent"] == "rebel_transfer_v1" and result["state"]["phase"] == "BIDDING" and result["state"]["turn"] == 1:
+                    if s["agent"] in REBEL_AGENTS and result["state"]["phase"] == "BIDDING" and result["state"]["turn"] == 1:
                         result = rebel_step(match_id, result["state"])
                     response = match_response(con, match_id, result["view"])
                     con.execute("UPDATE matches SET state=? WHERE id=?", (json.dumps(result["state"]), match_id))
                     con.execute("INSERT INTO requests VALUES (?,?,?)", (match_id, key, json.dumps(response)))
+                    if s["agent"] in REBEL_AGENTS and result["state"]["status"] == "COMPLETED":
+                        (rebel_v2_runtime if s["agent"] == "rebel_bluff_v2" else rebel_runtime).drop(match_id)
                     return response
         raise LookupError("endpoint not found")
 

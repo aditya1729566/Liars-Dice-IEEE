@@ -2,6 +2,7 @@
 import hashlib
 import json
 import os
+import secrets
 import select
 import subprocess
 import threading
@@ -15,6 +16,7 @@ CHECKPOINT_SHA256 = "028b9708fe60848cd409fde581bee1e92e20aa67b7cbd65c475e7bf0149
 SOURCE_COMMIT = "1d915cc2dcecf9670aaec652ab78bf528241ce21"
 LOCK = threading.RLock()
 WORKER = None
+SEEDS = {}
 
 
 def available():
@@ -56,10 +58,14 @@ def choose(match_id, state):
     if scripts not in path:
         path.insert(0, scripts)
     from rebel_bridge import private_observation
-    return command({"match_id": match_id, "seed": int(state["initial_seed"]),
-                    "observation": private_observation(state)})
+    with LOCK:
+        seed = SEEDS.setdefault(match_id, secrets.randbits(64))
+        return command({"match_id": match_id, "seed": seed,
+                        "observation": private_observation(state)})
 
 
 def drop(match_id):
-    if WORKER is not None and WORKER.poll() is None:
-        command({"op": "drop", "match_id": match_id})
+    with LOCK:
+        SEEDS.pop(match_id, None)
+        if WORKER is not None and WORKER.poll() is None:
+            command({"op": "drop", "match_id": match_id})

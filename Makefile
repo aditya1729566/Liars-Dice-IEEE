@@ -8,8 +8,9 @@ MCCFR_V2_MILESTONES ?= $(ITERATIONS)
 SMALL_ITERATIONS ?= 100
 SEED ?= 1729
 SEED_OFFSET ?= 7000000
+MIN_FREE_MIB ?= 2048
 EVAL_AGENTS ?= cfr2 probability conservative high_call
-.PHONY: setup setup-rebel build-engine dev kiosk test test-rebel verify train-small train-exhibit train-exhibit-v2 train-mccfr train-mccfr-v2 resume resume-v2 tournament evaluate evaluate-mccfr evaluate-mccfr-v2 evaluate-rebel export-results research-index build
+.PHONY: setup setup-rebel setup-rebel-v2 build-engine dev kiosk test test-rebel test-rebel-v2 verify train-small train-exhibit train-exhibit-v2 train-mccfr train-mccfr-v2 resume resume-v2 tournament evaluate evaluate-mccfr evaluate-mccfr-v2 evaluate-rebel evaluate-rebel-v2 export-results research-index build
 setup:
 	@$(PYTHON) --version
 	@cmake --version | head -1
@@ -18,6 +19,8 @@ setup:
 	cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 setup-rebel:
 	$(PYTHON) scripts/setup_rebel.py
+setup-rebel-v2:
+	$(PYTHON) scripts/setup_rebel_v2.py
 build-engine:
 	cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 	cmake --build build -j2
@@ -32,6 +35,8 @@ test: build-engine
 	$(PYTHON) -m unittest discover -s server/tests -v
 test-rebel:
 	.cache/rebel-venv/bin/python -m unittest discover -s scripts -p 'test_rebel_bridge.py' -v
+test-rebel-v2:
+	.cache/rebel-venv/bin/python -m unittest discover -s scripts -p 'test_rebel_v2_bridge.py' -v
 verify: test
 	npm --prefix web run lint
 	npm --prefix web run typecheck
@@ -62,6 +67,9 @@ evaluate-mccfr-v2: build-engine
 evaluate-rebel: build-engine
 	.cache/rebel-venv/bin/python scripts/tournament.py --run-id $(RUN_ID) --per-seat $(PER_SEAT) --n 5 --seed-offset $(SEED_OFFSET) --paired-seeds --stream-engine --agents rebel_transfer_v1 mccfr_external_v2 mccfr_external_v1 cfr2 cfr adaptive random probability aggressive conservative truthful high_call always_call switcher --focus rebel_transfer_v1
 	$(PYTHON) scripts/mccfr_v2_metrics.py $(RUN_ID) --agent rebel_transfer_v1
+evaluate-rebel-v2: build-engine
+	.cache/rebel-venv/bin/python scripts/tournament.py --run-id $(RUN_ID) --per-seat $(PER_SEAT) --seed-offset $(SEED_OFFSET) --paired-seeds --stream-engine --agents rebel_bluff_v2 rebel_transfer_v1 mccfr_external_v2 mccfr_external_v1 cfr2 cfr adaptive random probability aggressive conservative truthful high_call always_call switcher --focus rebel_bluff_v2 --min-free-mib $(MIN_FREE_MIB)
+	$(PYTHON) scripts/mccfr_v2_metrics.py $(RUN_ID) --agent rebel_bluff_v2
 export-results:
 	$(PYTHON) scripts/export_results.py
 research-index:

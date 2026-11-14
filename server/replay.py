@@ -67,6 +67,10 @@ def ai_action_read(kind, bid, decision, ai_hand, prior):
         selection = (f"The ReBeL transfer search sampled this action with {weight * 100:.1f}% weight "
                      "after four depth-one fictitious-play iterations. Its value network was trained "
                      "under different wild and bid rules, so this is an approximate transfer policy.")
+    elif source == "rebel_bluff_depth1_fp32" and weight is not None:
+        selection = (f"The updated ReBeL search sampled this action with {weight * 100:.1f}% weight "
+                     "after 32 depth-one fictitious-play iterations. This weight is its search mix, "
+                     "not the probability that its bid was true or that it would win.")
     elif source == "uniform_random":
         selection = "I sampled a legal action uniformly at random."
     elif source == "adaptive_public_outcomes":

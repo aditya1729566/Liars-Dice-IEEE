@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 const root = join(process.cwd(), 'runtime');
 const ruleset = 'fixed5_score5_quantity_only_v1';
-const agents = new Set(['random', 'probability', 'aggressive', 'cfr2', 'adaptive', 'mccfr_external_v1', 'mccfr_external_v2', 'rebel_transfer_v1']);
+const agents = new Set(['random', 'probability', 'aggressive', 'cfr2', 'adaptive', 'mccfr_external_v1', 'mccfr_external_v2', 'rebel_transfer_v1', 'rebel_bluff_v2']);
 type State = ReplayState & { ruleset: string; agent: string; version: number; phase: string; hands: number[][] };
 type StoredMatch = { state: State; created: number; requests: Record<string, object> };
 type EngineResult = { state?: State; view?: Record<string, unknown>; probability?: number; error?: string };
@@ -81,8 +81,8 @@ async function dispatch(method: string, request: Request, bits: string[]): Promi
   }
   if (method === 'GET' && bits.join('/') === 'rules') return { version: ruleset, faces: 6, wild: false, dice_per_player: 5, target_score: 5, bid_order: 'quantity only', next_starter: 'round loser' };
   if (method === 'GET' && bits.join('/') === 'agents') {
-    const versions: Record<string, string> = { cfr2: 'fixed5_cfr_v2_100k', adaptive: 'fixed5_cfr_100k', mccfr_external_v1: 'mccfr_external_v1', mccfr_external_v2: 'mccfr_external_v2', rebel_transfer_v1: 'rebel_transfer_v1' };
-    return { agents: [...agents].sort().map(id => ({ id, policy_version: versions[id] || 'fixed5_heuristic_v1', available: id === 'rebel_transfer_v1' ? false : versions[id] ? policyOk(id.startsWith('mccfr_external_') ? [id] : id === 'cfr2' ? ['fixed5_cfr_v2_100k'] : ['fixed5_cfr_100k']) : true, trained: id === 'cfr2' || id.startsWith('mccfr_external_') || id === 'rebel_transfer_v1', uses_trained_base: id === 'adaptive', scope: id === 'rebel_transfer_v1' ? 'local PyTorch transfer model; unavailable in this deployment' : id === 'mccfr_external_v2' ? 'external-sampling MCCFR with wider bids and depth-limited match utility' : id === 'mccfr_external_v1' ? 'external-sampling MCCFR one-round imperfect-recall abstraction' : id === 'cfr2' ? 'wider imperfect-recall one-round CFR abstraction' : id === 'adaptive' ? 'public-outcome model plus original CFR base' : 'heuristic' })) };
+    const versions: Record<string, string> = { cfr2: 'fixed5_cfr_v2_100k', adaptive: 'fixed5_cfr_100k', mccfr_external_v1: 'mccfr_external_v1', mccfr_external_v2: 'mccfr_external_v2', rebel_transfer_v1: 'rebel_transfer_v1', rebel_bluff_v2: 'rebel_bluff_v2' };
+    return { agents: [...agents].sort().map(id => ({ id, policy_version: versions[id] || 'fixed5_heuristic_v1', available: id.startsWith('rebel_') ? false : versions[id] ? policyOk(id.startsWith('mccfr_external_') ? [id] : id === 'cfr2' ? ['fixed5_cfr_v2_100k'] : ['fixed5_cfr_100k']) : true, trained: id === 'cfr2' || id.startsWith('mccfr_external_') || id.startsWith('rebel_'), uses_trained_base: id === 'adaptive', scope: id === 'rebel_bluff_v2' ? 'local BLUFF.EXE-specific PyTorch model; unavailable in this deployment' : id === 'rebel_transfer_v1' ? 'local PyTorch transfer model; unavailable in this deployment' : id === 'mccfr_external_v2' ? 'external-sampling MCCFR with wider bids and depth-limited match utility' : id === 'mccfr_external_v1' ? 'external-sampling MCCFR one-round imperfect-recall abstraction' : id === 'cfr2' ? 'wider imperfect-recall one-round CFR abstraction' : id === 'adaptive' ? 'public-outcome model plus original CFR base' : 'heuristic' })) };
   }
   if (method === 'GET' && bits.join('/') === 'research/summary') {
     const runs = JSON.parse(readFileSync(join(root, 'docs/research_runs.json'), 'utf8')) as object[];
@@ -93,7 +93,7 @@ async function dispatch(method: string, request: Request, bits: string[]): Promi
     const input = await body(request);
     const agent = input.agent ?? 'probability';
     if (input.n !== 5 || typeof agent !== 'string' || !agents.has(agent)) throw new ApiError('this game requires five dice and a supported agent');
-    if (agent === 'rebel_transfer_v1') throw new ApiError('ReBeL requires the local PyTorch runtime; use make setup-rebel and make dev');
+    if (agent === 'rebel_transfer_v1' || agent === 'rebel_bluff_v2') throw new ApiError('ReBeL requires the local PyTorch runtime; use make setup-rebel-v2 and make dev');
     if (['cfr2', 'adaptive', 'mccfr_external_v1', 'mccfr_external_v2'].includes(agent) && !policyOk(agent.startsWith('mccfr_external_') ? [agent] : agent === 'cfr2' ? ['fixed5_cfr_v2_100k'] : ['fixed5_cfr_100k'])) throw new ApiError('trained policy checksum failed');
     const result = engine({ op: 'new', n: 5, agent });
     if (!result.state || !result.view) throw Error('engine returned incomplete match');

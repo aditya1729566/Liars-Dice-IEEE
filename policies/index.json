@@ -81,6 +81,23 @@
       "evaluation_run": "rebel_transfer_final_20261112",
       "champion": false,
       "status": "local-only external dependency; approximate transfer"
+    },
+    {
+      "id": "rebel_bluff_v2",
+      "ruleset": "fixed5_score5_quantity_only_v1",
+      "agent_type": "upstream native BLUFF.EXE ReBeL value network with local depth-one fictitious-play search",
+      "training_objective": "upstream first-to-five BLUFF.EXE game; quantity-only bids; no wild dice; upstream alternates next opener",
+      "training_iterations": null,
+      "source_repository": "https://github.com/shivangijod-creator/ReBeL-Liars-Dice",
+      "source_commit": "05607c7a208189ac6b0149337f45d46ad3828894",
+      "parent_checkpoint": ".cache/rebel-source-v2/checkpoints/bluff_exe_v1/rebel_bluff_epoch_5.pt",
+      "checkpoint_sha256": "6c629db416e337bbce06e07375238b62fa3e414b8d36ae01b90635175fdbbc77",
+      "policy_path": ".cache/rebel-source-v2/checkpoints/bluff_exe_v1/rebel_bluff_epoch_5.pt",
+      "policy_sha256": "6c629db416e337bbce06e07375238b62fa3e414b8d36ae01b90635175fdbbc77",
+      "training_run": "upstream epoch 5; not trained in this repository",
+      "evaluation_run": "rebel_bluff_v2_final_random_20261114",
+      "champion": false,
+      "status": "local-only external dependency; evaluated, not promoted"
     }
   ]
 }

@@ -37,3 +37,7 @@ The corrected final tournament completed all 2,600 planned matches on seeds 9,40
 This model is selectable locally because it implements the requested checkpoint and search, but it was **not promoted**. The results support a narrow conclusion: directly transferring this value network to no-wild, quantity-only play is weak against most existing opponents. They do not measure how a ReBeL model retrained under the correct rules would play. The results also do not provide a full-game exploitability bound or human-match performance estimate.
 
 Every final match, decision, reveal, manifest, and derived metric is archived in `evidence/rebel-transfer-final-20261112.zip` (1,459,304 bytes; SHA-256 `2a04eea04c750b2eb4eb1e52de98d105e5eca204dd766634d335b108e3a11cd7`). Development screens are archived separately in `evidence/rebel-transfer-development-20261112.zip` (1,547,339 bytes; SHA-256 `b3d7ae99e48d9dc1905387fb05e5d2e385e6549934e3dd1e67647fc4b1b1ada4`). The model checkpoint is fetched from the pinned upstream source and is not embedded in either archive.
+
+## Later privacy correction (2026-11-14)
+
+The local runtime now seeds ReBeL Transfer search independently of the game-roll seed. The earlier 2026-11-12 tournament passed the game seed to its search RNG, so its results remain historical evidence but do not meet the stricter seed-isolation rule used for the updated model comparison. The checkpoint and its archived evaluations were not changed.

@@ -3548,6 +3548,479 @@
   },
   {
     "status": "completed",
+    "run_id": "rebel_bluff_v2_final_random_20261114",
+    "n": 5,
+    "completed_matches": 2800,
+    "results": {
+      "rebel_bluff_v2_vs_rebel_transfer_v1_seat_0": {
+        "wins": 95,
+        "matches": 100,
+        "win_rate": 0.95,
+        "wilson95": [
+          0.8882480347279118,
+          0.9784566385436864
+        ]
+      },
+      "rebel_bluff_v2_vs_rebel_transfer_v1_seat_1": {
+        "wins": 95,
+        "matches": 100,
+        "win_rate": 0.95,
+        "wilson95": [
+          0.8882480347279118,
+          0.9784566385436864
+        ]
+      },
+      "rebel_bluff_v2_vs_mccfr_external_v2_seat_0": {
+        "wins": 7,
+        "matches": 100,
+        "win_rate": 0.07,
+        "wilson95": [
+          0.034318824364064096,
+          0.13749671006529757
+        ]
+      },
+      "rebel_bluff_v2_vs_mccfr_external_v2_seat_1": {
+        "wins": 30,
+        "matches": 100,
+        "win_rate": 0.3,
+        "wilson95": [
+          0.21894753866228117,
+          0.39585038432811953
+        ]
+      },
+      "rebel_bluff_v2_vs_mccfr_external_v1_seat_0": {
+        "wins": 34,
+        "matches": 100,
+        "win_rate": 0.34,
+        "wilson95": [
+          0.25461379497543,
+          0.43722454341689065
+        ]
+      },
+      "rebel_bluff_v2_vs_mccfr_external_v1_seat_1": {
+        "wins": 47,
+        "matches": 100,
+        "win_rate": 0.47,
+        "wilson95": [
+          0.3751065198210374,
+          0.5671131686275227
+        ]
+      },
+      "rebel_bluff_v2_vs_cfr2_seat_0": {
+        "wins": 29,
+        "matches": 100,
+        "win_rate": 0.29,
+        "wilson95": [
+          0.21014706973984146,
+          0.38539074940007934
+        ]
+      },
+      "rebel_bluff_v2_vs_cfr2_seat_1": {
+        "wins": 41,
+        "matches": 100,
+        "win_rate": 0.41,
+        "wilson95": [
+          0.31867157095664655,
+          0.5079874943890338
+        ]
+      },
+      "rebel_bluff_v2_vs_cfr_seat_0": {
+        "wins": 10,
+        "matches": 100,
+        "win_rate": 0.1,
+        "wilson95": [
+          0.05522854161313613,
+          0.1743673043676654
+        ]
+      },
+      "rebel_bluff_v2_vs_cfr_seat_1": {
+        "wins": 19,
+        "matches": 100,
+        "win_rate": 0.19,
+        "wilson95": [
+          0.1251465399270426,
+          0.27779024070807856
+        ]
+      },
+      "rebel_bluff_v2_vs_adaptive_seat_0": {
+        "wins": 9,
+        "matches": 100,
+        "win_rate": 0.09,
+        "wilson95": [
+          0.04807199516388488,
+          0.16226374696643667
+        ]
+      },
+      "rebel_bluff_v2_vs_adaptive_seat_1": {
+        "wins": 10,
+        "matches": 100,
+        "win_rate": 0.1,
+        "wilson95": [
+          0.05522854161313613,
+          0.1743673043676654
+        ]
+      },
+      "rebel_bluff_v2_vs_random_seat_0": {
+        "wins": 100,
+        "matches": 100,
+        "win_rate": 1.0,
+        "wilson95": [
+          0.9630051925239981,
+          0.9999999999999999
+        ]
+      },
+      "rebel_bluff_v2_vs_random_seat_1": {
+        "wins": 100,
+        "matches": 100,
+        "win_rate": 1.0,
+        "wilson95": [
+          0.9630051925239981,
+          0.9999999999999999
+        ]
+      },
+      "rebel_bluff_v2_vs_probability_seat_0": {
+        "wins": 1,
+        "matches": 100,
+        "win_rate": 0.01,
+        "wilson95": [
+          0.0017673865655472645,
+          0.0544875247609346
+        ]
+      },
+      "rebel_bluff_v2_vs_probability_seat_1": {
+        "wins": 1,
+        "matches": 100,
+        "win_rate": 0.01,
+        "wilson95": [
+          0.0017673865655472645,
+          0.0544875247609346
+        ]
+      },
+      "rebel_bluff_v2_vs_aggressive_seat_0": {
+        "wins": 98,
+        "matches": 100,
+        "win_rate": 0.98,
+        "wilson95": [
+          0.9299868370580063,
+          0.9944981477650318
+        ]
+      },
+      "rebel_bluff_v2_vs_aggressive_seat_1": {
+        "wins": 100,
+        "matches": 100,
+        "win_rate": 1.0,
+        "wilson95": [
+          0.9630051925239981,
+          0.9999999999999999
+        ]
+      },
+      "rebel_bluff_v2_vs_conservative_seat_0": {
+        "wins": 0,
+        "matches": 100,
+        "win_rate": 0.0,
+        "wilson95": [
+          0.0,
+          0.03699480747600191
+        ]
+      },
+      "rebel_bluff_v2_vs_conservative_seat_1": {
+        "wins": 0,
+        "matches": 100,
+        "win_rate": 0.0,
+        "wilson95": [
+          0.0,
+          0.03699480747600191
+        ]
+      },
+      "rebel_bluff_v2_vs_truthful_seat_0": {
+        "wins": 0,
+        "matches": 100,
+        "win_rate": 0.0,
+        "wilson95": [
+          0.0,
+          0.03699480747600191
+        ]
+      },
+      "rebel_bluff_v2_vs_truthful_seat_1": {
+        "wins": 0,
+        "matches": 100,
+        "win_rate": 0.0,
+        "wilson95": [
+          0.0,
+          0.03699480747600191
+        ]
+      },
+      "rebel_bluff_v2_vs_high_call_seat_0": {
+        "wins": 11,
+        "matches": 100,
+        "win_rate": 0.11,
+        "wilson95": [
+          0.06254131955225126,
+          0.18631463027903022
+        ]
+      },
+      "rebel_bluff_v2_vs_high_call_seat_1": {
+        "wins": 5,
+        "matches": 100,
+        "win_rate": 0.05,
+        "wilson95": [
+          0.02154336145631356,
+          0.11175196527208817
+        ]
+      },
+      "rebel_bluff_v2_vs_always_call_seat_0": {
+        "wins": 87,
+        "matches": 100,
+        "win_rate": 0.87,
+        "wilson95": [
+          0.7901947810519012,
+          0.9224290614158575
+        ]
+      },
+      "rebel_bluff_v2_vs_always_call_seat_1": {
+        "wins": 56,
+        "matches": 100,
+        "win_rate": 0.56,
+        "wilson95": [
+          0.4622792771125631,
+          0.6532813459903167
+        ]
+      },
+      "rebel_bluff_v2_vs_switcher_seat_0": {
+        "wins": 11,
+        "matches": 100,
+        "win_rate": 0.11,
+        "wilson95": [
+          0.06254131955225126,
+          0.18631463027903022
+        ]
+      },
+      "rebel_bluff_v2_vs_switcher_seat_1": {
+        "wins": 14,
+        "matches": 100,
+        "win_rate": 0.14,
+        "wilson95": [
+          0.08526265754464905,
+          0.22137360383807236
+        ]
+      }
+    },
+    "decision_count": 59028,
+    "policy_hits": {
+      "adaptive": 1720,
+      "aggressive": 0,
+      "always_call": 0,
+      "cfr": 1919,
+      "cfr2": 2179,
+      "conservative": 0,
+      "high_call": 0,
+      "mccfr_external_v1": 2233,
+      "mccfr_external_v2": 2210,
+      "probability": 0,
+      "random": 0,
+      "rebel_bluff_v2": 30251,
+      "rebel_transfer_v1": 1827,
+      "switcher": 0,
+      "truthful": 0
+    },
+    "rebel_v2_metrics": {
+      "opponents": {
+        "adaptive": {
+          "paired_seed_cluster95": [
+            0.05162952714998925,
+            0.1683362669055723
+          ],
+          "policy_coverage": 1.0
+        },
+        "aggressive": {
+          "paired_seed_cluster95": [
+            0.9455124752390653,
+            1
+          ],
+          "policy_coverage": 1.0
+        },
+        "always_call": {
+          "paired_seed_cluster95": [
+            0.6198573490091175,
+            0.7942348837762017
+          ],
+          "policy_coverage": 1.0
+        },
+        "cfr": {
+          "paired_seed_cluster95": [
+            0.08914829555724922,
+            0.2271180177507121
+          ],
+          "policy_coverage": 1.0
+        },
+        "cfr2": {
+          "paired_seed_cluster95": [
+            0.2636410465347802,
+            0.4474573957080203
+          ],
+          "policy_coverage": 1.0
+        },
+        "conservative": {
+          "paired_seed_cluster95": [
+            0,
+            0.03699480747600191
+          ],
+          "policy_coverage": 1.0
+        },
+        "high_call": {
+          "paired_seed_cluster95": [
+            0.04109296948581091,
+            0.14998266879403072
+          ],
+          "policy_coverage": 1.0
+        },
+        "mccfr_external_v1": {
+          "paired_seed_cluster95": [
+            0.31403077536484125,
+            0.5029982380555992
+          ],
+          "policy_coverage": 1.0
+        },
+        "mccfr_external_v2": {
+          "paired_seed_cluster95": [
+            0.1210643903045992,
+            0.272242338405282
+          ],
+          "policy_coverage": 1.0
+        },
+        "probability": {
+          "paired_seed_cluster95": [
+            0,
+            0.0544875247609346
+          ],
+          "policy_coverage": 1.0
+        },
+        "random": {
+          "paired_seed_cluster95": [
+            0.9630051925239981,
+            1
+          ],
+          "policy_coverage": 1.0
+        },
+        "rebel_transfer_v1": {
+          "paired_seed_cluster95": [
+            0.8882480347279118,
+            0.9795481117686208
+          ],
+          "policy_coverage": 1.0
+        },
+        "switcher": {
+          "paired_seed_cluster95": [
+            0.0737672261688866,
+            0.20397887943811482
+          ],
+          "policy_coverage": 1.0
+        },
+        "truthful": {
+          "paired_seed_cluster95": [
+            0,
+            0.03699480747600191
+          ],
+          "policy_coverage": 1.0
+        }
+      }
+    },
+    "provenance": {
+      "seed_offset": 10000000,
+      "engine_sha256": "239d30808077994f9f2c7be18446e63ac53b8b8230c31890ae5796ab4c8f85b9",
+      "policy_sha256": null,
+      "policy_sha256_by_file": {
+        ".cache/rebel-source/checkpoints/rebel_5x6f_epoch_6.pt": "028b9708fe60848cd409fde581bee1e92e20aa67b7cbd65c475e7bf0149f2f3a",
+        ".cache/rebel-source-v2/checkpoints/bluff_exe_v1/rebel_bluff_epoch_5.pt": "6c629db416e337bbce06e07375238b62fa3e414b8d36ae01b90635175fdbbc77",
+        "policies/fixed5_cfr.json": "9054a212e2865189ee9358e344e3fba48298408edb96fbf8cc343e75d005b977",
+        "policies/fixed5_cfr_v2.json": "d99c9c002989c65fed62348b8ea623974436b7ebc75f9a0821c6e5edee99d9a8",
+        "policies/mccfr_external_v1.bin": "6d184abbb39cd577d5cdd7668888fe419b485383e87ce88364743ecf6bb0522c",
+        "policies/mccfr_external_v2.bin": "4326b283fe865df94ced77bf5a2053ebe5520caf6c0d5df9ea7bf68c59c88bfb"
+      }
+    }
+  },
+  {
+    "status": "completed",
+    "run_id": "rebel_bluff_v2_smoke_20261114",
+    "n": 5,
+    "completed_matches": 6,
+    "results": {
+      "rebel_bluff_v2_vs_mccfr_external_v2_seat_0": {
+        "wins": 1,
+        "matches": 1,
+        "win_rate": 1.0,
+        "wilson95": [
+          0.20654329147389294,
+          1.0
+        ]
+      },
+      "rebel_bluff_v2_vs_mccfr_external_v2_seat_1": {
+        "wins": 1,
+        "matches": 1,
+        "win_rate": 1.0,
+        "wilson95": [
+          0.20654329147389294,
+          1.0
+        ]
+      },
+      "rebel_bluff_v2_vs_rebel_transfer_v1_seat_0": {
+        "wins": 1,
+        "matches": 1,
+        "win_rate": 1.0,
+        "wilson95": [
+          0.20654329147389294,
+          1.0
+        ]
+      },
+      "rebel_bluff_v2_vs_rebel_transfer_v1_seat_1": {
+        "wins": 1,
+        "matches": 1,
+        "win_rate": 1.0,
+        "wilson95": [
+          0.20654329147389294,
+          1.0
+        ]
+      },
+      "rebel_bluff_v2_vs_probability_seat_0": {
+        "wins": 0,
+        "matches": 1,
+        "win_rate": 0.0,
+        "wilson95": [
+          0.0,
+          0.7934567085261071
+        ]
+      },
+      "rebel_bluff_v2_vs_probability_seat_1": {
+        "wins": 0,
+        "matches": 1,
+        "win_rate": 0.0,
+        "wilson95": [
+          0.0,
+          0.7934567085261071
+        ]
+      }
+    },
+    "decision_count": 135,
+    "policy_hits": {
+      "mccfr_external_v2": 27,
+      "probability": 0,
+      "rebel_bluff_v2": 71,
+      "rebel_transfer_v1": 15
+    },
+    "provenance": {
+      "seed_offset": 9600000,
+      "engine_sha256": "239d30808077994f9f2c7be18446e63ac53b8b8230c31890ae5796ab4c8f85b9",
+      "policy_sha256": null,
+      "policy_sha256_by_file": {
+        ".cache/rebel-source/checkpoints/rebel_5x6f_epoch_6.pt": "028b9708fe60848cd409fde581bee1e92e20aa67b7cbd65c475e7bf0149f2f3a",
+        ".cache/rebel-source-v2/checkpoints/bluff_exe_v1/rebel_bluff_epoch_5.pt": "6c629db416e337bbce06e07375238b62fa3e414b8d36ae01b90635175fdbbc77",
+        "policies/mccfr_external_v2.bin": "4326b283fe865df94ced77bf5a2053ebe5520caf6c0d5df9ea7bf68c59c88bfb"
+      }
+    },
+    "warning": "Six-match updated ReBeL integration smoke check; not a strength estimate."
+  },
+  {
+    "status": "completed",
     "run_id": "rebel_fp16_dev_20261112",
     "n": 5,
     "completed_matches": 80,
@@ -4243,5 +4716,85 @@
       }
     },
     "warning": "Development screen before per-match ReBeL sampler reseeding; use the final tournament for strength estimates."
+  },
+  {
+    "status": "completed",
+    "run_id": "rebel_v2_seed_replay_a_20261115",
+    "n": 5,
+    "completed_matches": 2,
+    "results": {
+      "rebel_bluff_v2_vs_probability_seat_0": {
+        "wins": 0,
+        "matches": 1,
+        "win_rate": 0.0,
+        "wilson95": [
+          0.0,
+          0.7934567085261071
+        ]
+      },
+      "rebel_bluff_v2_vs_probability_seat_1": {
+        "wins": 0,
+        "matches": 1,
+        "win_rate": 0.0,
+        "wilson95": [
+          0.0,
+          0.7934567085261071
+        ]
+      }
+    },
+    "decision_count": 36,
+    "policy_hits": {
+      "probability": 0,
+      "rebel_bluff_v2": 19
+    },
+    "provenance": {
+      "seed_offset": 11000000,
+      "engine_sha256": "239d30808077994f9f2c7be18446e63ac53b8b8230c31890ae5796ab4c8f85b9",
+      "policy_sha256": "6c629db416e337bbce06e07375238b62fa3e414b8d36ae01b90635175fdbbc77",
+      "policy_sha256_by_file": {
+        ".cache/rebel-source-v2/checkpoints/bluff_exe_v1/rebel_bluff_epoch_5.pt": "6c629db416e337bbce06e07375238b62fa3e414b8d36ae01b90635175fdbbc77"
+      }
+    },
+    "warning": "Two-match exact seed-replay check; not a strength estimate."
+  },
+  {
+    "status": "completed",
+    "run_id": "rebel_v2_seed_replay_b_20261115",
+    "n": 5,
+    "completed_matches": 2,
+    "results": {
+      "rebel_bluff_v2_vs_probability_seat_0": {
+        "wins": 0,
+        "matches": 1,
+        "win_rate": 0.0,
+        "wilson95": [
+          0.0,
+          0.7934567085261071
+        ]
+      },
+      "rebel_bluff_v2_vs_probability_seat_1": {
+        "wins": 0,
+        "matches": 1,
+        "win_rate": 0.0,
+        "wilson95": [
+          0.0,
+          0.7934567085261071
+        ]
+      }
+    },
+    "decision_count": 36,
+    "policy_hits": {
+      "probability": 0,
+      "rebel_bluff_v2": 19
+    },
+    "provenance": {
+      "seed_offset": 11000000,
+      "engine_sha256": "239d30808077994f9f2c7be18446e63ac53b8b8230c31890ae5796ab4c8f85b9",
+      "policy_sha256": "6c629db416e337bbce06e07375238b62fa3e414b8d36ae01b90635175fdbbc77",
+      "policy_sha256_by_file": {
+        ".cache/rebel-source-v2/checkpoints/bluff_exe_v1/rebel_bluff_epoch_5.pt": "6c629db416e337bbce06e07375238b62fa3e414b8d36ae01b90635175fdbbc77"
+      }
+    },
+    "warning": "Repeat of the exact seed-replay check; not independent strength evidence."
   }
 ]

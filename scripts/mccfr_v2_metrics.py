@@ -85,6 +85,10 @@ def analyze(folder, agent=AGENT):
                   'challenge_accuracy': group['correct_calls'] / group['calls'] if group['calls'] else None,
                   'latency_p50_ms': percentile(group['latencies'], 0.5),
                   'latency_p95_ms': percentile(group['latencies'], 0.95)}
+        if agent == 'rebel_bluff_v2':
+            result['worker_response_coverage'] = result['policy_coverage']
+            result['learned_information_set_coverage'] = None
+            result['coverage_note'] = 'Worker response coverage only; no learned information-set coverage is measured.'
         if len(group['seeds']) > 1 and all(len(outcomes) == 2 for outcomes in group['seeds'].values()):
             paired = [sum(outcomes) / 2 for outcomes in group['seeds'].values()]
             standard_error = math.sqrt(statistics.variance(paired) / len(paired))
